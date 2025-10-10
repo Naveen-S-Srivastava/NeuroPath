@@ -124,6 +124,10 @@ app.use('/api/suppliers', suppliersRoutes);
 const promoCodesRoutes = require('./routes/promoCodes');
 app.use('/api/promo-codes', promoCodesRoutes);
 
+// Contact
+const contactRoutes = require('./routes/contact');
+app.use('/api/contact', contactRoutes);
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ message: 'Something went wrong!' });

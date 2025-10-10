@@ -70,6 +70,7 @@ export const PatientDashboard = () => {
   // Prescription modal state
   const [prescriptionModalOpen, setPrescriptionModalOpen] = useState(false);
   const [selectedPrescription, setSelectedPrescription] = useState(null);
+  const [showCallModal, setShowCallModal] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('neurocare_token');
@@ -336,6 +337,7 @@ export const PatientDashboard = () => {
         const [stream] = e.streams;
         setRemoteStream(stream);
         setCallActive(true);
+        setShowCallModal(true);
       };
 
       pc.onicecandidate = (e) => {
@@ -372,6 +374,7 @@ export const PatientDashboard = () => {
       console.warn('WebRTC cleanup error:', error);
     }
     setCallActive(false);
+    setShowCallModal(false);
   };
 
   const acceptCall = async () => {
@@ -385,6 +388,7 @@ export const PatientDashboard = () => {
         const [stream] = e.streams;
         setRemoteStream(stream);
         setCallActive(true);
+        setShowCallModal(true);
       };
 
       const localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
@@ -639,53 +643,6 @@ export const PatientDashboard = () => {
                   <Video className="h-4 w-4 mr-2" />
                   Accept
                 </Button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Active Call Interface */}
-        {callActive && (
-          <div className="mb-6 bg-gray-900 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white font-semibold">Video Call in Progress</h3>
-              <Button
-                onClick={() => {
-                  const socket = connectSocket(localStorage.getItem('neurocare_token'));
-                  socket.emit('webrtc:end');
-                  endCall();
-                }}
-                variant="destructive"
-                size="sm"
-              >
-                <X className="h-4 w-4 mr-2" />
-                End Call
-              </Button>
-            </div>
-            <div className="relative bg-black rounded-lg overflow-hidden">
-              <video
-                ref={(el) => {
-                  remoteVideoRef.current = el;
-                  if (el && remoteStream) {
-                    el.srcObject = remoteStream;
-                  }
-                }}
-                className="w-full h-64 bg-black"
-                autoPlay
-                playsInline
-              />
-              <div className="absolute bottom-2 right-2 w-32 h-24 bg-black/60 rounded border">
-                <video
-                  className="w-full h-full object-cover"
-                  autoPlay
-                  muted
-                  playsInline
-                  ref={(el) => {
-                    if (el && localStreamRef.current) {
-                      el.srcObject = localStreamRef.current;
-                    }
-                  }}
-                />
               </div>
             </div>
           </div>
@@ -1244,12 +1201,12 @@ export const PatientDashboard = () => {
                 <div className="flex-1 p-4 space-y-4 overflow-y-auto">
                   {chatMessagesState.map((m, idx) => {
                     const msg = m.message ? m.message : m;
-                    const isIncoming = (msg.senderId && String(msg.senderId) !== String(user?.id)) || (m.from && String(m.from) !== String(user?.id));
+                    const isPatient = (msg.senderId && String(msg.senderId) === String(user?.id)) || (m.from && String(m.from) === String(user?.id));
                     return (
-                      <div key={msg._id || m.id || idx} className={`flex ${isIncoming ? 'justify-start' : 'justify-end'}`}>
-                        <div className={`max-w-xs px-4 py-2 rounded-lg ${isIncoming ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white' : 'bg-blue-600 text-white'}`}>
+                      <div key={msg._id || m.id || idx} className={`flex ${isPatient ? 'justify-start' : 'justify-end'}`}>
+                        <div className={`max-w-xs px-4 py-2 rounded-lg ${isPatient ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white' : 'bg-blue-600 text-white'}`}>
                           <p className="text-sm">{msg.content || m.content}</p>
-                          <p className={`text-xs mt-1 ${isIncoming ? 'text-gray-600 dark:text-gray-400' : 'text-blue-100'}`}>
+                          <p className={`text-xs mt-1 ${isPatient ? 'text-gray-600 dark:text-gray-400' : 'text-blue-100'}`}>
                             {new Date(msg.createdAt || m.createdAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </p>
                         </div>
@@ -1380,6 +1337,67 @@ export const PatientDashboard = () => {
           </div>
         )}
       </div>
+
+      {/* Video Call Modal */}
+      {showCallModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="relative w-50% h-50% max-w-6xl max-h-screen bg-blue-800 rounded-lg overflow-hidden">
+            <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="bg-white/20 p-2 rounded-full">
+                  <Video className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-white font-semibold">Video Call</h3>
+                  <p className="text-white/80 text-sm">In call with doctor</p>
+                </div>
+              </div>
+              <Button
+                onClick={() => {
+                  const socket = connectSocket(localStorage.getItem('neurocare_token'));
+                  socket.emit('webrtc:end');
+                  endCall();
+                }}
+                variant="destructive"
+                size="sm"
+                className="bg-red-600 hover:bg-red-700"
+              >
+                <X className="h-4 w-4 mr-2" />
+                End Call
+              </Button>
+            </div>
+            <div className="w-full h-full relative">
+              <video
+                ref={(el) => {
+                  remoteVideoRef.current = el;
+                  if (el && remoteStream) {
+                    el.srcObject = remoteStream;
+                  }
+                }}
+                className="w-full h-full bg-black object-cover"
+                autoPlay
+                playsInline
+              />
+              <div className="absolute bottom-4 right-4 w-64 h-48 bg-black/60 rounded-lg border-2 border-white/20 overflow-hidden">
+                <video
+                  className="w-full h-full object-cover"
+                  autoPlay
+                  muted
+                  playsInline
+                  ref={(el) => {
+                    if (el && localStreamRef.current) {
+                      el.srcObject = localStreamRef.current;
+                    }
+                  }}
+                />
+                <div className="absolute bottom-2 left-2 text-white text-xs bg-black/50 px-2 py-1 rounded">
+                  You
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
