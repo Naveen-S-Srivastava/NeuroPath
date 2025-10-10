@@ -3,9 +3,19 @@ const Appointment = require('../models/Appointment');
 const User = require('../models/User');
 const Message = require('../models/Message');
 const { authenticateToken, authorizeRoles } = require('../middleware/auth');
+const nodemailer = require('nodemailer');
 
 module.exports = (io) => {
   const router = express.Router();
+
+  // Email transporter
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER || 'neurocare@gmail.com',
+      pass: process.env.EMAIL_PASS // App password for Gmail
+    }
+  });
 
   // List neurologists with simple availability info
   router.get('/neurologists', authenticateToken, async (req, res) => {
@@ -81,6 +91,38 @@ module.exports = (io) => {
       });
 
       await appointment.save();
+
+      // Send email to neurologist for scheduling confirmation
+      try {
+        const patient = await User.findById(req.user.id);
+        
+        const mailOptions = {
+          from: process.env.EMAIL_USER || 'neurocare@gmail.com',
+          to: neurologist.email,
+          subject: 'New Appointment Booking - Patient Scheduled',
+          html: `
+            <h2>New Patient Appointment Booked</h2>
+            <p>A new appointment has been booked with you.</p>
+            <h3>Appointment Details:</h3>
+            <ul>
+              <li><strong>Patient:</strong> ${patient.name} (${patient.email})</li>
+              <li><strong>Neurologist:</strong> Dr. ${neurologist.name}</li>
+              <li><strong>Date:</strong> ${date}</li>
+              <li><strong>Time:</strong> ${time}</li>
+              <li><strong>Type:</strong> ${type}</li>
+              <li><strong>Status:</strong> Pending (Please confirm)</li>
+            </ul>
+            <p>Please review and confirm this appointment.</p>
+            <p>Best regards,<br>NeuroCare System</p>
+          `
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log('Appointment notification email sent successfully to neurologist:', neurologist.email);
+      } catch (emailError) {
+        console.error('Failed to send appointment email:', emailError);
+        // Don't fail the booking if email fails
+      }
 
       // Notify neurologist via socket if connected
       try {
