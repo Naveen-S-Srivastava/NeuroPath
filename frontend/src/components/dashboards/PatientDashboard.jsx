@@ -1206,7 +1206,7 @@ export const PatientDashboard = () => {
               </CardHeader>
               <CardContent className="p-0 flex flex-col h-full">
                 {/* Video Call Area */}
-                {callActive && (
+                {/* {callActive && (
                   <div className="p-4 border-b">
                     <div className="relative bg-black rounded-lg overflow-hidden">
                       <video
@@ -1238,7 +1238,7 @@ export const PatientDashboard = () => {
                       </div>
                     </div>
                   </div>
-                )}
+                )} */}
 
                 {/* Messages */}
                 <div className="flex-1 p-4 space-y-4 overflow-y-auto">
