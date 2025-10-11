@@ -30,13 +30,16 @@ import {
   Activity,
   PlayCircle,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Mail,
+  Clock,
+  RefreshCw
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, user, logout, updateUser } = useAuth();
   const { isDarkMode } = useThemeToggle();
   const [formData, setFormData] = useState({
     email: '',
@@ -49,6 +52,13 @@ export const LoginPage = () => {
   const [errors, setErrors] = useState({});
   const [particles, setParticles] = useState([]);
   const [showPromoCode, setShowPromoCode] = useState(false);
+  const [otpData, setOtpData] = useState({
+    otp: '',
+    expiresIn: 0
+  });
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpTimer, setOtpTimer] = useState(0);
+  const [loginStep, setLoginStep] = useState('credentials'); // 'credentials' or 'otp'
 
   const roles = [
     { 
@@ -119,6 +129,17 @@ export const LoginPage = () => {
     createParticles();
   }, []);
 
+  // OTP Timer Effect
+  useEffect(() => {
+    let interval;
+    if (otpTimer > 0) {
+      interval = setInterval(() => {
+        setOtpTimer(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [otpTimer]);
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -155,6 +176,88 @@ export const LoginPage = () => {
     toast.success(`Filled ${account.label} credentials`);
   };
 
+  // OTP Functions
+  const resendOTP = async () => {
+    if (otpTimer > 0) {
+      toast.error(`Please wait ${otpTimer} seconds before resending`);
+      return;
+    }
+
+    setOtpLoading(true);
+    try {
+      const response = await fetch('/api/otp/resend-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          role: formData.role
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setOtpTimer(data.expiresIn);
+        toast.success('OTP resent successfully!');
+      } else {
+        toast.error(data.message || 'Failed to resend OTP');
+      }
+    } catch (error) {
+      console.error('Resend OTP error:', error);
+      toast.error('Failed to resend OTP. Please try again.');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const verifyOTP = async () => {
+    if (!otpData.otp || otpData.otp.length !== 6) {
+      toast.error('Please enter a valid 6-digit OTP');
+      return;
+    }
+
+    setOtpLoading(true);
+    try {
+      const response = await fetch('/api/otp/verify-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          otp: otpData.otp,
+          role: formData.role,
+          promoCode: formData.promoCode
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('OTP verification successful:', data);
+        console.log('Navigating to:', `/${formData.role}-dashboard`);
+        
+        // Update AuthContext with user data and token
+        updateUser(data.user, data.token);
+        
+        toast.success('Login successful!');
+        navigate(`/${formData.role}-dashboard`);
+      } else {
+        toast.error(data.message || 'Invalid OTP');
+        if (data.attemptsLeft !== undefined) {
+          toast.info(`${data.attemptsLeft} attempts remaining`);
+        }
+      }
+    } catch (error) {
+      console.error('Verify OTP error:', error);
+      toast.error('Failed to verify OTP. Please try again.');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -163,16 +266,32 @@ export const LoginPage = () => {
     }
 
     try {
-      const success = await login(formData.email, formData.password, formData.role, formData.promoCode);
-      if (success) {
-        toast.success('Login successful!');
-        navigate(`/${formData.role}-dashboard`);
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
+          promoCode: formData.promoCode
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.requiresOTP) {
+        // Credentials verified, OTP sent
+        setLoginStep('otp');
+        setOtpTimer(data.expiresIn);
+        toast.success('Credentials verified! OTP sent to your email.');
       } else {
-        toast.error('Invalid credentials. Please try again.');
+        toast.error(data.message || 'Login failed. Please check your credentials.');
       }
     } catch (error) {
       console.error('Login error:', error);
-      toast.error(error.message || 'Login failed. Please check your credentials and role selection.');
+      toast.error('Login failed. Please try again.');
     }
   };
 
@@ -402,7 +521,10 @@ export const LoginPage = () => {
                       <p className={`text-base md:text-lg ${
                         isDarkMode ? 'text-gray-300' : 'text-gray-600'
                       }`}>
-                        Enter your credentials to access your account
+                        {loginStep === 'credentials' 
+                          ? 'Enter your credentials to access your account'
+                          : 'Verify your email with OTP'
+                        }
                       </p>
                     </div>
                     <DropdownMenu>
@@ -438,57 +560,61 @@ export const LoginPage = () => {
                     </DropdownMenu>
                   </div>
                 </div>
+
+
                 <div className="space-y-6">
                 
 
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Role Selection */}
-                    <div className="space-y-3">
-                      <Label htmlFor="role" className={`text-base font-semibold ${
-                        isDarkMode ? 'text-white' : 'text-gray-700'
-                      }`}>
-                        I am a
-                      </Label>
-                      <Select
-                        value={formData.role}
-                        onValueChange={(value) => handleInputChange('role', value)}
-                      >
-                        <SelectTrigger className={`h-12 rounded-2xl backdrop-blur-sm border transition-all duration-300 hover-morph smooth-focus ${
-                          errors.role 
-                            ? 'border-red-500 bg-red-50/50 dark:bg-red-900/20' 
-                            : isDarkMode 
-                              ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40' 
-                              : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500'
+                  <form onSubmit={loginStep === 'credentials' ? handleSubmit : (e) => { e.preventDefault(); verifyOTP(); }} className="space-y-6">
+                    {/* Role Selection - Only show in credentials step */}
+                    {loginStep === 'credentials' && (
+                      <div className="space-y-3">
+                        <Label htmlFor="role" className={`text-base font-semibold ${
+                          isDarkMode ? 'text-white' : 'text-gray-700'
                         }`}>
-                          <SelectValue placeholder="Select your role" />
-                        </SelectTrigger>
-                        <SelectContent className="backdrop-blur-xl border-gray-200 bg-white dark:bg-gray-800/90">
-                          {roles.map((role) => (
-                            <SelectItem key={role.value} value={role.value}>
-                              <div className="flex items-center space-x-3">
-                                <div className={`p-1.5 rounded-lg bg-gradient-to-r ${role.gradient}`}>
-                                  <role.icon className="h-4 w-4 text-white" />
+                          I am a
+                        </Label>
+                        <Select
+                          value={formData.role}
+                          onValueChange={(value) => handleInputChange('role', value)}
+                        >
+                          <SelectTrigger className={`h-12 rounded-2xl backdrop-blur-sm border transition-all duration-300 hover-morph smooth-focus ${
+                            errors.role 
+                              ? 'border-red-500 bg-red-50/50 dark:bg-red-900/20' 
+                              : isDarkMode 
+                                ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40' 
+                                : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500'
+                          }`}>
+                            <SelectValue placeholder="Select your role" />
+                          </SelectTrigger>
+                          <SelectContent className="backdrop-blur-xl border-gray-200 bg-white dark:bg-gray-800/90">
+                            {roles.map((role) => (
+                              <SelectItem key={role.value} value={role.value}>
+                                <div className="flex items-center space-x-3">
+                                  <div className={`p-1.5 rounded-lg bg-gradient-to-r ${role.gradient}`}>
+                                    <role.icon className="h-4 w-4 text-white" />
+                                  </div>
+                                  <span>{role.label}</span>
                                 </div>
-                                <span>{role.label}</span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {errors.role && (
-                        <p className="text-sm text-red-500 flex items-center space-x-1">
-                          <span>⚠️</span>
-                          <span>{errors.role}</span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {errors.role && (
+                          <p className="text-sm text-red-500 flex items-center space-x-1">
+                            <span>⚠️</span>
+                            <span>{errors.role}</span>
+                          </p>
+                        )}
+                        <p className={`text-xs mt-1 ${
+                          isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
+                          Make sure to select the correct role that matches your account type.
                         </p>
-                      )}
-                      <p className={`text-xs mt-1 ${
-                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                      }`}>
-                        Make sure to select the correct role that matches your account type.
-                      </p>
-                    </div>
+                      </div>
+                    )}
 
-                    {/* Email */}
+                    {/* Email - Show in both steps */}
                     <div className="space-y-3">
                       <Label htmlFor="email" className={`text-base font-semibold ${
                         isDarkMode ? 'text-white' : 'text-gray-700'
@@ -501,13 +627,14 @@ export const LoginPage = () => {
                         placeholder="Enter your email"
                         value={formData.email}
                         onChange={(e) => handleInputChange('email', e.target.value)}
+                        disabled={loginStep === 'otp'}
                         className={`h-12 rounded-2xl backdrop-blur-sm border transition-all duration-300 ${
                           errors.email 
                             ? 'border-red-500 bg-red-50/50 dark:bg-red-900/20' 
                             : isDarkMode 
                               ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40' 
                               : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500'
-                        }`}
+                        } ${loginStep === 'otp' ? 'opacity-60' : ''}`}
                       />
                       {errors.email && (
                         <p className="text-sm text-red-500 flex items-center space-x-1">
@@ -517,52 +644,54 @@ export const LoginPage = () => {
                       )}
                     </div>
 
-                    {/* Password */}
-                    <div className="space-y-3">
-                      <Label htmlFor="password" className={`text-base font-semibold ${
-                        isDarkMode ? 'text-white' : 'text-gray-700'
-                      }`}>
-                        Password
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          id="password"
-                          type={showPassword ? 'text' : 'password'}
-                          placeholder="Enter your password"
-                          value={formData.password}
-                          onChange={(e) => handleInputChange('password', e.target.value)}
-                          className={`h-12 rounded-2xl backdrop-blur-sm border transition-all duration-300 pr-12 ${
-                            errors.password 
-                              ? 'border-red-500 bg-red-50/50 dark:bg-red-900/20' 
-                              : isDarkMode 
-                                ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40' 
-                                : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500'
-                          }`}
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                          onClick={() => setShowPassword(!showPassword)}
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </Button>
+                    {/* Password - Only show in credentials step */}
+                    {loginStep === 'credentials' && (
+                      <div className="space-y-3">
+                        <Label htmlFor="password" className={`text-base font-semibold ${
+                          isDarkMode ? 'text-white' : 'text-gray-700'
+                        }`}>
+                          Password
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="password"
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Enter your password"
+                            value={formData.password}
+                            onChange={(e) => handleInputChange('password', e.target.value)}
+                            className={`h-12 rounded-2xl backdrop-blur-sm border transition-all duration-300 pr-12 ${
+                              errors.password 
+                                ? 'border-red-500 bg-red-50/50 dark:bg-red-900/20' 
+                                : isDarkMode 
+                                  ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40' 
+                                  : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500'
+                            }`}
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                        {errors.password && (
+                          <p className="text-sm text-red-500 flex items-center space-x-1">
+                            <span>⚠️</span>
+                            <span>{errors.password}</span>
+                          </p>
+                        )}
                       </div>
-                      {errors.password && (
-                        <p className="text-sm text-red-500 flex items-center space-x-1">
-                          <span>⚠️</span>
-                          <span>{errors.password}</span>
-                        </p>
-                      )}
-                    </div>
+                    )}
 
-                    {/* Promo Code Field - Only show for patients */}
-                    {formData.role === 'patient' && (
+                    {/* Promo Code Field - Only show for patients in credentials step */}
+                    {loginStep === 'credentials' && formData.role === 'patient' && (
                       <div className="space-y-3">
                         <Button
                           type="button"
@@ -620,6 +749,92 @@ export const LoginPage = () => {
                       </div>
                     )}
 
+                    {/* OTP Step */}
+                    {loginStep === 'otp' && (
+                      <div className="space-y-4">
+                        <div className={`p-4 rounded-2xl border ${
+                          isDarkMode 
+                            ? 'border-green-400/30 bg-green-400/10' 
+                            : 'border-green-300 bg-green-50'
+                        }`}>
+                          <div className="flex items-center space-x-3 mb-2">
+                            <Mail className={`h-5 w-5 ${isDarkMode ? 'text-green-400' : 'text-green-600'}`} />
+                            <span className={`font-semibold ${isDarkMode ? 'text-green-400' : 'text-green-600'}`}>
+                              OTP Sent Successfully
+                            </span>
+                          </div>
+                          <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                            Check your email for the 6-digit verification code.
+                            {otpTimer > 0 && (
+                              <span className={`ml-2 font-semibold ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                                Expires in {Math.floor(otpTimer / 60)}:{(otpTimer % 60).toString().padStart(2, '0')}
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          <Label htmlFor="otp" className={`text-base font-semibold ${
+                            isDarkMode ? 'text-white' : 'text-gray-700'
+                          }`}>
+                            Enter Verification Code
+                          </Label>
+                          <Input
+                            id="otp"
+                            type="text"
+                            placeholder="Enter 6-digit OTP"
+                            value={otpData.otp}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                              setOtpData(prev => ({ ...prev, otp: value }));
+                            }}
+                            className={`h-12 rounded-2xl backdrop-blur-sm border transition-all duration-300 text-center text-lg font-mono ${
+                              isDarkMode 
+                                ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40' 
+                                : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500'
+                            }`}
+                          />
+                        </div>
+
+                        <div className="flex space-x-3">
+                          <Button
+                            type="button"
+                            onClick={resendOTP}
+                            disabled={otpTimer > 0 || otpLoading}
+                            variant="outline"
+                            className={`flex-1 h-12 rounded-2xl transition-all duration-300 ${
+                              otpTimer > 0 || otpLoading
+                                ? 'opacity-50 cursor-not-allowed'
+                                : isDarkMode
+                                  ? 'border-white/20 bg-white/5 hover:bg-white/10 text-white'
+                                  : 'border-gray-300 bg-white hover:bg-gray-50 text-gray-700'
+                            }`}
+                          >
+                            <RefreshCw className={`mr-2 h-4 w-4 ${otpLoading ? 'animate-spin' : ''}`} />
+                            {otpTimer > 0 ? `Resend in ${otpTimer}s` : 'Resend OTP'}
+                          </Button>
+                          
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              setLoginStep('credentials');
+                              setOtpTimer(0);
+                              setOtpData({ otp: '', expiresIn: 0 });
+                            }}
+                            variant="outline"
+                            className={`flex-1 h-12 rounded-2xl transition-all duration-300 ${
+                              isDarkMode
+                                ? 'border-white/20 bg-white/5 hover:bg-white/10 text-white'
+                                : 'border-gray-300 bg-white hover:bg-gray-50 text-gray-700'
+                            }`}
+                          >
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Back
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Remember Me & Forgot Password */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
@@ -653,30 +868,59 @@ export const LoginPage = () => {
                       </Button>
                     </div>
 
-                    {/* Submit Button */}
-                    <div>
-                      <Button
-                        type="submit"
-                        className={`w-full h-14 rounded-2xl font-semibold text-lg transition-all duration-500 transform hover:scale-105 hover:shadow-2xl ripple-effect animate-glow-pulse ${
-                          selectedRole?.gradient 
-                            ? `bg-gradient-to-r ${selectedRole.gradient} hover:shadow-lg` 
-                            : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'
-                        } shadow-lg`}
-                        disabled={isLoading}
-                      >
-                        {isLoading ? (
-                          <>
-                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                            Signing In...
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="mr-2 h-5 w-5" />
-                            Sign In
-                          </>
-                        )}
-                      </Button>
-                    </div>
+                    {/* Submit Button - Only show in credentials step */}
+                    {loginStep === 'credentials' && (
+                      <div>
+                        <Button
+                          type="submit"
+                          className={`w-full h-14 rounded-2xl font-semibold text-lg transition-all duration-500 transform hover:scale-105 hover:shadow-2xl ripple-effect animate-glow-pulse ${
+                            selectedRole?.gradient 
+                              ? `bg-gradient-to-r ${selectedRole.gradient} hover:shadow-lg` 
+                              : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'
+                          } shadow-lg`}
+                          disabled={isLoading}
+                        >
+                          {isLoading ? (
+                            <>
+                              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                              Verifying...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="mr-2 h-5 w-5" />
+                              Verify & Continue
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* OTP Verify Button - Only show in OTP step */}
+                    {loginStep === 'otp' && (
+                      <div>
+                        <Button
+                          type="submit"
+                          className={`w-full h-14 rounded-2xl font-semibold text-lg transition-all duration-500 transform hover:scale-105 hover:shadow-2xl ripple-effect animate-glow-pulse ${
+                            selectedRole?.gradient 
+                              ? `bg-gradient-to-r ${selectedRole.gradient} hover:shadow-lg` 
+                              : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
+                          } shadow-lg`}
+                          disabled={otpLoading || otpData.otp.length !== 6}
+                        >
+                          {otpLoading ? (
+                            <>
+                              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                              Verifying...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="mr-2 h-5 w-5" />
+                              Verify & Sign In
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    )}
                   </form>
 
                   {/* Sign Up Link */}

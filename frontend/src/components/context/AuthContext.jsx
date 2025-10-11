@@ -151,11 +151,18 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('neuropath_token');
   };
 
+  const updateUser = (userData, token) => {
+    setUser(userData);
+    localStorage.setItem('neuropath_user', JSON.stringify(userData));
+    localStorage.setItem('neuropath_token', token);
+  };
+
   const value = {
     user,
     login,
     logout,
     signup,
+    updateUser,
     isLoading
   };
 

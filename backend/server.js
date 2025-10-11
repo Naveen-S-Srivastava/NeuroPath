@@ -25,6 +25,7 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/otp', require('./routes/otp'));
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/users', userRoutes);
 
