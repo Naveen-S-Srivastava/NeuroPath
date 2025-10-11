@@ -52,13 +52,14 @@ import {
   User,
   Eye
 } from 'lucide-react';
-import { toast } from 'sonner';
+import ChatBot from '../ui/ChatBot';
 
 export const AdminDashboard = () => {
   const { _user, logout } = useAuth();
   const { isDarkMode, toggleTheme } = useThemeToggle();
   const [activeTab, setActiveTab] = useState('overview');
   const [particles, setParticles] = useState([]);
+  const [isChatBotOpen, setIsChatBotOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [supplierSearchQuery, setSupplierSearchQuery] = useState('');
   const [patientSearchQuery, setPatientSearchQuery] = useState('');
@@ -1542,6 +1543,12 @@ export const AdminDashboard = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* ChatBot */}
+      <ChatBot 
+        isOpen={isChatBotOpen} 
+        onToggle={() => setIsChatBotOpen(!isChatBotOpen)} 
+      />
     </div>
   );
 };

@@ -39,7 +39,7 @@ import {
   Settings,
   Bell
 } from 'lucide-react';
-import { toast } from 'sonner';
+import ChatBot from '../ui/ChatBot';
 import { connectSocket, getSocket } from '../../lib/socket';
 
 export const NeurologistDashboard = () => {
@@ -47,6 +47,7 @@ export const NeurologistDashboard = () => {
   const { isDarkMode, toggleTheme } = useThemeToggle();
   const [activeTab, setActiveTab] = useState('overview');
   const [particles, setParticles] = useState([]);
+  const [isChatBotOpen, setIsChatBotOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [dashboardData, setDashboardData] = useState({
     appointments: [],
@@ -2430,6 +2431,12 @@ export const NeurologistDashboard = () => {
           </div>
         </div>
       )}
+
+      {/* ChatBot */}
+      <ChatBot 
+        isOpen={isChatBotOpen} 
+        onToggle={() => setIsChatBotOpen(!isChatBotOpen)} 
+      />
     </div>
   );
 };

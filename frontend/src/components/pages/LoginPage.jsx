@@ -364,7 +364,7 @@ export const LoginPage = () => {
 
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
             {/* Left Side - Info and Benefits */}
-            <div className="space-y-8">
+          <div className="space-y-8">
               <div className="space-y-6">
                 <div className="flex items-center space-x-3">
                   <Link to="/">
@@ -375,26 +375,26 @@ export const LoginPage = () => {
                   <span className={`text-3xl font-bold ${
                     isDarkMode ? 'text-white' : 'text-gray-900'
                   }`}>
-                    NeuroPath
-                  </span>
-                </div>
+                  NeuroPath
+                </span>
+              </div>
                 <h1 className={`text-4xl md:text-5xl font-bold leading-tight ${
                   isDarkMode ? 'text-white' : 'text-gray-900'
                 }`}>
-                  Welcome Back
-                </h1>
+                Welcome Back
+              </h1>
                 <p className={`text-lg md:text-xl leading-relaxed ${
                   isDarkMode ? 'text-gray-300' : 'text-gray-600'
                 }`}>
                   Sign in to access your healthcare  </p>
-              </div>
+            </div>
 
               <div className={`relative overflow-hidden rounded-3xl shadow-2xl backdrop-blur-sm border ${
                 isDarkMode ? 'border-white/10 bg-white/5' : 'border-gray-200 bg-white/80'
               }`}>
-                <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1758691463110-697a814b2033?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWRpY2FsJTIwdGVhbSUyMGNvbnN1bHRhdGlvbnxlbnwxfHx8fDE3NTg3OTA5MTF8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
-                  alt="Medical consultation"
+            <ImageWithFallback
+              src="https://images.unsplash.com/photo-1758691463110-697a814b2033?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWRpY2FsJTIwdGVhbSUyMGNvbnN1bHRhdGlvbnxlbnwxfHx8fDE3NTg3OTA5MTF8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+              alt="Medical consultation"
                   className="w-full h-80 object-cover"
                 />
                 <div className={`absolute inset-0 bg-gradient-to-t ${
@@ -458,10 +458,10 @@ export const LoginPage = () => {
                       }`}>
                         {benefit.text}
                       </span>
-                    </div>
-                  ))}
                 </div>
-              </div> */}
+              ))}
+                </div>
+            </div> */}
 
               {/* Role Info */}
               {/* {selectedRole && (
@@ -488,7 +488,7 @@ export const LoginPage = () => {
                 </div>
               )} */}
 
-              {/* Test Credentials Info */}
+            {/* Test Credentials Info */}
               {/* <div className={`p-6 rounded-2xl backdrop-blur-sm border ${
                 isDarkMode 
                   ? 'border-white/10 bg-white/5' 
@@ -503,16 +503,16 @@ export const LoginPage = () => {
                   <p><strong>Admin:</strong> admin@neuropath.com / admin123</p>
                   <p><strong>Neurologist:</strong> sarah@neuropath.com / admin123</p>
                   <p><strong>Patient:</strong> john@neuropath.com / admin123</p>
-                </div>
+                  </div>
                 <p className={`text-xs mt-2 ${
                   isDarkMode ? 'text-blue-300' : 'text-blue-700'
                 }`}>
-                  Remember to select the correct role from the dropdown!
-                </p>
+                    Remember to select the correct role from the dropdown!
+                  </p>
               </div> */}
           </div>
 
-            {/* Right Side - Login Form */}
+          {/* Right Side - Login Form */}
             <div className="w-full max-w-lg mx-auto lg:max-w-md">
               <div className={`p-6 md:p-8 rounded-3xl shadow-2xl hover-glow ${
                 isDarkMode 
@@ -525,7 +525,7 @@ export const LoginPage = () => {
                       <h2 className={`text-2xl md:text-3xl font-bold ${
                         isDarkMode ? 'text-white' : 'text-gray-900'
                       }`}>
-                        Sign In
+                  Sign In
                       </h2>
                       <p className={`text-base md:text-lg ${
                         isDarkMode ? 'text-gray-300' : 'text-gray-600'
@@ -585,10 +585,10 @@ export const LoginPage = () => {
                         }`}>
                           I am a
                         </Label>
-                        <Select
-                          value={formData.role}
-                          onValueChange={(value) => handleInputChange('role', value)}
-                        >
+                    <Select
+                      value={formData.role}
+                      onValueChange={(value) => handleInputChange('role', value)}
+                    >
                           <SelectTrigger className={`h-12 rounded-2xl backdrop-blur-sm border transition-all duration-300 hover-morph smooth-focus ${
                             errors.role 
                               ? 'border-red-500 bg-red-50/50 dark:bg-red-900/20' 
@@ -596,33 +596,33 @@ export const LoginPage = () => {
                                 ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40' 
                                 : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500'
                           }`}>
-                            <SelectValue placeholder="Select your role" />
-                          </SelectTrigger>
+                        <SelectValue placeholder="Select your role" />
+                      </SelectTrigger>
                           <SelectContent className="backdrop-blur-xl border-gray-200 bg-white dark:bg-gray-800/90">
-                            {roles.map((role) => (
-                              <SelectItem key={role.value} value={role.value}>
+                        {roles.map((role) => (
+                          <SelectItem key={role.value} value={role.value}>
                                 <div className="flex items-center space-x-3">
                                   <div className={`p-1.5 rounded-lg bg-gradient-to-r ${role.gradient}`}>
                                     <role.icon className="h-4 w-4 text-white" />
                                   </div>
-                                  <span>{role.label}</span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {errors.role && (
+                              <span>{role.label}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.role && (
                           <p className="text-sm text-red-500 flex items-center space-x-1">
                             <span>⚠️</span>
                             <span>{errors.role}</span>
                           </p>
-                        )}
+                    )}
                         <p className={`text-xs mt-1 ${
                           isDarkMode ? 'text-gray-400' : 'text-gray-500'
                         }`}>
-                          Make sure to select the correct role that matches your account type.
-                        </p>
-                      </div>
+                      Make sure to select the correct role that matches your account type.
+                    </p>
+                  </div>
                     )}
 
                     {/* Email - Show in both steps */}
@@ -632,12 +632,12 @@ export const LoginPage = () => {
                       }`}>
                         Email Address
                       </Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={formData.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
                         disabled={loginStep === 'otp'}
                         className={`h-12 rounded-2xl backdrop-blur-sm border transition-all duration-300 ${
                           errors.email 
@@ -646,14 +646,14 @@ export const LoginPage = () => {
                               ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40' 
                               : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500'
                         } ${loginStep === 'otp' ? 'opacity-60' : ''}`}
-                      />
-                      {errors.email && (
+                    />
+                    {errors.email && (
                         <p className="text-sm text-red-500 flex items-center space-x-1">
                           <span>⚠️</span>
                           <span>{errors.email}</span>
                         </p>
-                      )}
-                    </div>
+                    )}
+                  </div>
 
                     {/* Password - Only show in credentials step */}
                     {loginStep === 'credentials' && (
@@ -663,13 +663,13 @@ export const LoginPage = () => {
                         }`}>
                           Password
                         </Label>
-                        <div className="relative">
-                          <Input
-                            id="password"
-                            type={showPassword ? 'text' : 'password'}
-                            placeholder="Enter your password"
-                            value={formData.password}
-                            onChange={(e) => handleInputChange('password', e.target.value)}
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Enter your password"
+                        value={formData.password}
+                        onChange={(e) => handleInputChange('password', e.target.value)}
                             className={`h-12 rounded-2xl backdrop-blur-sm border transition-all duration-300 pr-12 ${
                               errors.password 
                                 ? 'border-red-500 bg-red-50/50 dark:bg-red-900/20' 
@@ -677,28 +677,28 @@ export const LoginPage = () => {
                                   ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40' 
                                   : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500'
                             }`}
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                            onClick={() => setShowPassword(!showPassword)}
-                          >
-                            {showPassword ? (
-                              <EyeOff className="h-4 w-4" />
-                            ) : (
-                              <Eye className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </div>
-                        {errors.password && (
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    {errors.password && (
                           <p className="text-sm text-red-500 flex items-center space-x-1">
                             <span>⚠️</span>
                             <span>{errors.password}</span>
                           </p>
-                        )}
-                      </div>
+                    )}
+                  </div>
                     )}
 
                     {/* Promo Code Field - Only show for patients in credentials step */}
@@ -730,12 +730,12 @@ export const LoginPage = () => {
                         
                         {showPromoCode && (
                           <div className="space-y-3 animate-in slide-in-from-top-2 duration-300">
-                            <Input
-                              id="promoCode"
-                              type="text"
-                              placeholder="Enter promo code if provided by your doctor"
-                              value={formData.promoCode}
-                              onChange={(e) => handleInputChange('promoCode', e.target.value.toUpperCase())}
+                      <Input
+                        id="promoCode"
+                        type="text"
+                        placeholder="Enter promo code if provided by your doctor"
+                        value={formData.promoCode}
+                        onChange={(e) => handleInputChange('promoCode', e.target.value.toUpperCase())}
                               className={`h-12 rounded-2xl backdrop-blur-sm border transition-all duration-300 ${
                                 errors.promoCode 
                                   ? 'border-red-500 bg-red-50/50 dark:bg-red-900/20' 
@@ -743,18 +743,18 @@ export const LoginPage = () => {
                                     ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40' 
                                     : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500'
                               }`}
-                            />
-                            {errors.promoCode && (
+                      />
+                      {errors.promoCode && (
                               <p className="text-sm text-red-500 flex items-center space-x-1">
                                 <span>⚠️</span>
                                 <span>{errors.promoCode}</span>
                               </p>
-                            )}
+                      )}
                             <p className={`text-xs ${
                               isDarkMode ? 'text-gray-400' : 'text-gray-500'
                             }`}>
-                              If you have a promo code from your doctor, enter it here to be assigned to a specific neurologist.
-                            </p>
+                        If you have a promo code from your doctor, enter it here to be assigned to a specific neurologist.
+                      </p>
                           </div>
                         )}
                       </div>
@@ -843,60 +843,60 @@ export const LoginPage = () => {
                             Back
                           </Button>
                         </div>
-                      </div>
-                    )}
+                    </div>
+                  )}
 
-                    {/* Remember Me & Forgot Password */}
-                    <div className="flex items-center justify-between">
+                  {/* Remember Me & Forgot Password */}
+                  <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <Checkbox
-                          id="remember"
-                          checked={formData.rememberMe}
-                          onCheckedChange={(checked) => handleInputChange('rememberMe', checked)}
+                      <Checkbox
+                        id="remember"
+                        checked={formData.rememberMe}
+                        onCheckedChange={(checked) => handleInputChange('rememberMe', checked)}
                           className={`rounded-lg border-2 transition-all duration-300 ${
                             isDarkMode 
                               ? 'border-white/30 data-[state=checked]:bg-blue-500' 
                               : 'border-gray-400 data-[state=checked]:bg-blue-500'
                           }`}
-                        />
+                      />
                         <Label htmlFor="remember" className={`text-sm ${
                           isDarkMode ? 'text-gray-300' : 'text-gray-600'
                         }`}>
-                          Remember me
-                        </Label>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="link"
+                        Remember me
+                      </Label>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="link"
                         className={`p-0 h-auto font-semibold text-lg transition-all duration-300 ${
                           isDarkMode 
                             ? 'text-blue-400 hover:text-blue-300' 
                             : 'text-blue-600 hover:text-blue-500'
                         }`}
-                        onClick={() => toast.info('Password reset feature coming soon!')}
-                      >
-                        Forgot password?
-                      </Button>
-                    </div>
+                      onClick={() => toast.info('Password reset feature coming soon!')}
+                    >
+                      Forgot password?
+                    </Button>
+                  </div>
 
                     {/* Submit Button - Only show in credentials step */}
                     {loginStep === 'credentials' && (
                       <div>
-                        <Button
-                          type="submit"
+                  <Button
+                    type="submit"
                           className={`w-full h-14 rounded-2xl font-semibold text-lg transition-all duration-500 transform hover:scale-105 hover:shadow-2xl ripple-effect animate-glow-pulse ${
                             selectedRole?.gradient 
                               ? `bg-gradient-to-r ${selectedRole.gradient} hover:shadow-lg` 
                               : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'
                           } shadow-lg`}
-                          disabled={isLoading}
-                        >
-                          {isLoading ? (
-                            <>
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
                               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                              Signing In...
-                            </>
-                          ) : (
+                        Signing In...
+                      </>
+                    ) : (
                             <>
                               <Sparkles className="mr-2 h-5 w-5" />
                               {formData.role === 'patient' ? 'Verify & Continue' : 'Sign In'}
@@ -928,47 +928,47 @@ export const LoginPage = () => {
                               <Sparkles className="mr-2 h-5 w-5" />
                               Verify & Sign In
                             </>
-                          )}
-                        </Button>
+                    )}
+                  </Button>
                       </div>
                     )}
-                  </form>
+                </form>
 
-                  {/* Sign Up Link */}
+                {/* Sign Up Link */}
                   {/* <div className="text-center pt-6">
                     <p className={`text-base ${
                       isDarkMode ? 'text-gray-300' : 'text-gray-600'
                     }`}>
-                      Don't have an account?{' '}
-                      <Button
-                        variant="link"
+                    Don't have an account?{' '}
+                    <Button
+                      variant="link"
                         className={`p-0 h-auto font-semibold text-lg transition-all duration-300 ${
                           isDarkMode 
                             ? 'text-blue-400 hover:text-blue-300' 
                             : 'text-blue-600 hover:text-blue-500'
                         }`}
-                        onClick={() => navigate('/signup')}
-                      >
-                        Sign up here
-                      </Button>
-                    </p>
+                      onClick={() => navigate('/signup')}
+                    >
+                      Sign up here
+                    </Button>
+                  </p>
                     <div className="mt-2">
-                      <Button
-                        variant="link"
+                    <Button
+                      variant="link"
                         className={`p-0 h-auto font-semibold text-lg transition-all duration-300 ${
                           isDarkMode 
                             ? 'text-blue-400 hover:text-blue-300' 
                             : 'text-blue-600 hover:text-blue-500'
                         }`}
-                        onClick={() => navigate('/supplier-login')}
-                      >
-                        Supplier Login
-                      </Button>
+                      onClick={() => navigate('/supplier-login')}
+                    >
+                      Supplier Login
+                    </Button>
                     </div>
                   </div> */}
                 </div>
-              </div>
-            </div>
+                  </div>
+                </div>
           </div>
         </div>
       </div>

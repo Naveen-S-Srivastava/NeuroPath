@@ -43,7 +43,7 @@ import {
   LogOut,
   User
 } from 'lucide-react';
-import { toast } from 'sonner';
+import ChatBot from '../ui/ChatBot';
 import { ReportPreviewModal } from '../ui/ReportPreviewModal';
 import { BookingModal } from '../ui/BookingModal';
 import { connectSocket } from '../../lib/socket';
@@ -63,6 +63,7 @@ export const PatientDashboard = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadTitle, setUploadTitle] = useState('');
   const [particles, setParticles] = useState([]);
+  const [isChatBotOpen, setIsChatBotOpen] = useState(false);
   const fileInputRef = React.useRef(null);
 
   // Medicine order (prescription upload) state
@@ -787,9 +788,9 @@ export const PatientDashboard = () => {
                      : 'border-gray-300 bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700 shadow-sm hover:shadow-md'
                  }`}
                >
-                 <Bell className="h-4 w-4 mr-2" />
-                 Notifications
-               </Button>
+                <Bell className="h-4 w-4 mr-2" />
+                Notifications
+              </Button>
                <Button 
                  variant="ghost" 
                  size="sm"
@@ -816,7 +817,7 @@ export const PatientDashboard = () => {
                  <LogOut className="h-4 w-4 mr-2" />
                  Logout
                </Button>
-             </div>
+            </div>
           </div>
         </div>
 
@@ -1973,6 +1974,12 @@ export const PatientDashboard = () => {
           </div>
         </div>
       )}
+
+      {/* ChatBot */}
+      <ChatBot 
+        isOpen={isChatBotOpen} 
+        onToggle={() => setIsChatBotOpen(!isChatBotOpen)} 
+      />
     </div>
   );
 };
