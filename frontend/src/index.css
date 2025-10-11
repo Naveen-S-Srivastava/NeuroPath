@@ -248,6 +248,70 @@ html {
   100% { background-position: 0% 50%; }
 }
 
+/* Enhanced Date Picker Styling */
+input[type="date"] {
+  position: relative;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  height: auto;
+  color: transparent;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-datetime-edit {
+  padding: 0;
+  margin: 0;
+}
+
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+  margin: 0;
+}
+
+input[type="date"]::-webkit-datetime-edit-text {
+  color: inherit;
+  padding: 0 2px;
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  color: inherit;
+  padding: 0 2px;
+}
+
+/* Dark theme date picker */
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+/* Custom calendar popup styling */
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 4px;
+}
+
+/* Firefox date picker styling */
+input[type="date"]::-moz-calendar-picker-indicator {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+/* Enhanced date input focus */
+input[type="date"]:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
 .animate-gradient {
   background-size: 200% 200%;
   animation: gradient-shift 3s ease infinite;
