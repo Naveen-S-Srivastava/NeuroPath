@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Progress } from '../ui/progress';
 import { useAuth } from '../context/AuthContext';
+import { useThemeToggle } from '../hooks/useTheme';
 import { ImageWithFallback } from '../ui/ImageWithFallback';
 import {
   Calendar,
@@ -32,7 +33,14 @@ import {
   TrendingUp,
   X,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Sparkles,
+  Zap,
+  Shield,
+  Brain,
+  ArrowLeft,
+  Settings,
+  LogOut
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ReportPreviewModal } from '../ui/ReportPreviewModal';
@@ -40,7 +48,8 @@ import { BookingModal } from '../ui/BookingModal';
 import { connectSocket } from '../../lib/socket';
 
 export const PatientDashboard = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const { isDarkMode, toggleTheme } = useThemeToggle();
   const [activeTab, setActiveTab] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
   const [dashboardData, setDashboardData] = useState({
@@ -52,6 +61,7 @@ export const PatientDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [uploadTitle, setUploadTitle] = useState('');
+  const [particles, setParticles] = useState([]);
   const fileInputRef = React.useRef(null);
 
   // Medicine order (prescription upload) state
@@ -73,6 +83,19 @@ export const PatientDashboard = () => {
   const [showCallModal, setShowCallModal] = useState(false);
 
   useEffect(() => {
+    // Create floating particles
+    const createParticles = () => {
+      const newParticles = Array.from({ length: 6 }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        delay: Math.random() * 6,
+        duration: 6 + Math.random() * 4,
+      }));
+      setParticles(newParticles);
+    };
+    
+    createParticles();
+
     const token = localStorage.getItem('neuropath_token');
     let socket;
     try {
@@ -585,28 +608,132 @@ export const PatientDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto p-6">
+    <div className={`min-h-screen relative overflow-hidden transition-all duration-500 ${
+      isDarkMode 
+        ? 'bg-gradient-to-br from-gray-900 via-black to-gray-800' 
+        : 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50'
+    }`}>
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Morphing Orbs */}
+        <div className={`absolute top-20 left-20 w-32 h-32 rounded-full animate-morph opacity-20 ${
+          isDarkMode ? 'bg-white' : 'bg-blue-200'
+        }`}></div>
+        <div className={`absolute top-40 right-32 w-24 h-24 rounded-full animate-morph opacity-30 ${
+          isDarkMode ? 'bg-gray-300' : 'bg-indigo-200'
+        }`} style={{ animationDelay: '2s' }}></div>
+        <div className={`absolute bottom-32 left-1/3 w-28 h-28 rounded-full animate-morph opacity-25 ${
+          isDarkMode ? 'bg-gray-200' : 'bg-slate-200'
+        }`} style={{ animationDelay: '4s' }}></div>
+        
+        {/* Floating Particles */}
+        {particles.map((particle) => (
+          <div
+            key={particle.id}
+            className={`absolute w-2 h-2 rounded-full animate-float-slow ${
+              isDarkMode ? 'bg-white' : 'bg-blue-300'
+            }`}
+            style={{
+              left: `${particle.left}%`,
+              animationDelay: `${particle.delay}s`,
+              animationDuration: `${particle.duration}s`,
+            }}
+          />
+        ))}
+        
+        {/* Glow Effects */}
+        <div className={`absolute top-1/4 left-1/4 w-96 h-96 rounded-full animate-glow-pulse opacity-10 ${
+          isDarkMode ? 'bg-white' : 'bg-blue-200'
+        }`}></div>
+        <div className={`absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full animate-glow-pulse opacity-15 ${
+          isDarkMode ? 'bg-gray-300' : 'bg-indigo-200'
+        }`} style={{ animationDelay: '3s' }}></div>
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto p-6">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 animate-slide-in-blur">
           <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Welcome back, {user?.name}!
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Manage your health and stay connected with your neurologists
-              </p>
-            </div>
             <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => window.history.back()}
+                className={`px-4 py-2 rounded-xl border-2 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 backdrop-blur-md ${
+                  isDarkMode 
+                    ? 'text-white border-white/30 bg-white/10 hover:bg-white/20 hover:border-white/50' 
+                    : 'text-gray-800 border-white/30 bg-white/20 hover:bg-white/30 hover:border-white/40'
+                }`}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Button>
+              <div>
+                <h1 className={`text-3xl font-bold bg-gradient-to-r ${
+                  isDarkMode 
+                    ? 'from-white to-gray-300' 
+                    : 'from-gray-900 to-gray-700'
+                } bg-clip-text text-transparent`}>
+                  Welcome back, {user?.name}!
+                </h1>
+                <p className={`text-sm ${
+                  isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                }`}>
+                  Manage your health and stay connected with your neurologists
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={toggleTheme}
+                className={`px-4 py-2 rounded-xl border backdrop-blur-md transition-all duration-300 hover:scale-105 ${
+                  isDarkMode 
+                    ? 'border-white/20 bg-white/10 hover:bg-white/20 text-white' 
+                    : 'border-white/30 bg-white/20 hover:bg-white/30 text-gray-700'
+                }`}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Theme
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className={`px-4 py-2 rounded-xl border backdrop-blur-md transition-all duration-300 hover:scale-105 ${
+                  isDarkMode 
+                    ? 'border-white/20 bg-white/10 hover:bg-white/20 text-white' 
+                    : 'border-white/30 bg-white/20 hover:bg-white/30 text-gray-700'
+                }`}
+              >
                 <Bell className="h-4 w-4 mr-2" />
                 Notifications
               </Button>
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={user?.avatar} alt={user?.name} />
-                <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
-              </Avatar>
+              <div className="relative group">
+                <Avatar className="h-10 w-10 border-2 border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                  <AvatarImage src={user?.avatar} alt={user?.name} />
+                  <AvatarFallback className={`${
+                    isDarkMode ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-700'
+                  }`}>
+                    {user?.name?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className={`absolute top-12 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+                  isDarkMode 
+                    ? 'bg-gray-800 border-white/20' 
+                    : 'bg-white border-gray-200'
+                } border rounded-lg shadow-lg p-2 min-w-[120px]`}>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={logout}
+                    className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -650,77 +777,169 @@ export const PatientDashboard = () => {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="appointments">Appointments</TabsTrigger>
-            <TabsTrigger value="reports">Reports</TabsTrigger>
-            <TabsTrigger value="medicines">Medicines</TabsTrigger>
+          <TabsList className={`grid w-full grid-cols-4 backdrop-blur-md border transition-all duration-300 ${
+            isDarkMode 
+              ? 'bg-white/10 border-white/20' 
+              : 'bg-white/20 border-white/30'
+          }`}>
+            <TabsTrigger 
+              value="overview" 
+              className={`transition-all duration-300 hover:scale-105 ${
+                isDarkMode 
+                  ? 'data-[state=active]:bg-white/20 data-[state=active]:text-white hover:bg-white/10' 
+                  : 'data-[state=active]:bg-blue-500 data-[state=active]:text-white hover:bg-gray-100'
+              }`}
+            >
+              <Activity className="h-4 w-4 mr-2" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger 
+              value="appointments"
+              className={`transition-all duration-300 hover:scale-105 ${
+                isDarkMode 
+                  ? 'data-[state=active]:bg-white/20 data-[state=active]:text-white hover:bg-white/10' 
+                  : 'data-[state=active]:bg-blue-500 data-[state=active]:text-white hover:bg-gray-100'
+              }`}
+            >
+              <Calendar className="h-4 w-4 mr-2" />
+              Appointments
+            </TabsTrigger>
+            <TabsTrigger 
+              value="reports"
+              className={`transition-all duration-300 hover:scale-105 ${
+                isDarkMode 
+                  ? 'data-[state=active]:bg-white/20 data-[state=active]:text-white hover:bg-white/10' 
+                  : 'data-[state=active]:bg-blue-500 data-[state=active]:text-white hover:bg-gray-100'
+              }`}
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Reports
+            </TabsTrigger>
+            <TabsTrigger 
+              value="medicines"
+              className={`transition-all duration-300 hover:scale-105 ${
+                isDarkMode 
+                  ? 'data-[state=active]:bg-white/20 data-[state=active]:text-white hover:bg-white/10' 
+                  : 'data-[state=active]:bg-blue-500 data-[state=active]:text-white hover:bg-gray-100'
+              }`}
+            >
+              <Heart className="h-4 w-4 mr-2" />
+              Medicines
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {quickActions.map((action) => (
-                <Card key={action.id} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={action.action}>
-                  <CardContent className="p-6">
-                    <div className={`w-12 h-12 rounded-lg ${action.color} flex items-center justify-center mb-4`}>
+              {quickActions.map((action, index) => (
+                <div 
+                  key={action.id} 
+                  className={`group cursor-pointer transition-all duration-300 hover:scale-105 animate-slide-in-blur`}
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                  onClick={action.action}
+                >
+                  <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
+                    isDarkMode 
+                      ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
+                      : 'bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40 shadow-lg'
+                  }`}>
+                    <div className={`w-12 h-12 rounded-xl ${action.color} flex items-center justify-center mb-4 shadow-lg group-hover:shadow-xl transition-all duration-300`}>
                       <action.icon className="h-6 w-6" />
                     </div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                    <h3 className={`font-semibold mb-2 transition-colors duration-300 ${
+                      isDarkMode ? 'text-white' : 'text-gray-900'
+                    }`}>
                       {action.title}
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className={`text-sm transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                    }`}>
                       {action.description}
                     </p>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               ))}
             </div>
 
             {/* Real-time Neurologists */}
-            <div className="mt-6">
-              <h2 className="text-lg font-semibold mb-3">
+            <div className="mt-6 animate-slide-in-blur">
+              <h2 className={`text-lg font-semibold mb-3 ${
+                isDarkMode ? 'text-white' : 'text-gray-900'
+              }`}>
                 Available Neurologists
                 {neurologists.length === 1 && neurologists[0]?.isAssigned && (
-                  <span className="ml-2 text-sm font-normal text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                  <span className={`ml-2 text-sm font-normal px-2 py-1 rounded ${
+                    isDarkMode 
+                      ? 'text-blue-400 bg-blue-500/20' 
+                      : 'text-blue-600 bg-blue-50'
+                  }`}>
                     Assigned via Promo Code
                   </span>
                 )}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4">
-                {neurologists.map((doc) => (
-                  <Card key={doc._id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
-                    <CardContent className="p-4">
+                {neurologists.map((doc, index) => (
+                  <div 
+                    key={doc._id} 
+                    className={`transition-all duration-300 hover:scale-105 animate-slide-in-blur`}
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <div className={`p-4 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
+                      isDarkMode 
+                        ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
+                        : 'bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40 shadow-lg'
+                    }`}>
                       <div className="flex items-center space-x-4 mb-3">
-                        <Avatar className="h-12 w-12">
+                        <Avatar className="h-12 w-12 border-2 border-white/20 shadow-lg">
                           <AvatarImage src={doc.avatar} alt={doc.name} />
-                          <AvatarFallback>{doc.name ? doc.name.charAt(0) : ''}</AvatarFallback>
+                          <AvatarFallback className={`${
+                            isDarkMode ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-700'
+                          }`}>
+                            {doc.name ? doc.name.charAt(0) : ''}
+                          </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                           <div className="flex items-center">
-
-                            <h3 className="font-semibold text-gray-900 dark:text-white">{doc.name}</h3>
-
-                            <h6
-                              className={`flex items-center text-sm font-medium ${doc.available ? 'text-green-600' : 'text-red-600'
-                                }`}
-                            >
-                              <span
-                                className={`h-2.5 w-2.5 rounded-full ml-2 mr-2 ${doc.available ? 'bg-green-600' : 'bg-red-600'
-                                  }`}
-                              ></span>
-                            </h6>
+                            <h3 className={`font-semibold ${
+                              isDarkMode ? 'text-white' : 'text-gray-900'
+                            }`}>
+                              {doc.name}
+                            </h3>
+                            <div className={`flex items-center text-sm font-medium ml-2 ${
+                              doc.available ? 'text-green-500' : 'text-red-500'
+                            }`}>
+                              <span className={`h-2.5 w-2.5 rounded-full mr-2 ${
+                                doc.available ? 'bg-green-500' : 'bg-red-500'
+                              }`}></span>
+                              {doc.available ? 'Online' : 'Offline'}
+                            </div>
                           </div>
-
-                          <p className="text-sm text-gray-600 dark:text-gray-400">{doc.specialty} • {doc.experience}</p>
-                          <div className="text-sm text-gray-500 mt-1">{doc.location} • {doc.fee}</div>
+                          <p className={`text-sm ${
+                            isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                          }`}>
+                            {doc.specialty} • {doc.experience}
+                          </p>
+                          <div className={`text-sm ${
+                            isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                          } mt-1`}>
+                            {doc.location} • {doc.fee}
+                          </div>
                         </div>
                         <div className="flex flex-col space-y-2">
-                          <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                            setSelectedNeurologist(doc);
-                            setBookingOpen(true);
-                          }} disabled={!doc.available}>
+                          <Button 
+                            className={`bg-gradient-to-r ${
+                              doc.available 
+                                ? 'from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700' 
+                                : 'from-gray-400 to-gray-500 cursor-not-allowed'
+                            } text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105`}
+                            onClick={() => {
+                              setSelectedNeurologist(doc);
+                              setBookingOpen(true);
+                            }} 
+                            disabled={!doc.available}
+                          >
+                            <Sparkles className="h-4 w-4 mr-2" />
                             Book
                           </Button>
 
@@ -731,113 +950,219 @@ export const PatientDashboard = () => {
 
 
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
             {/* Recent Reports */}
-            <div className="grid lg:grid-cols-1 gap-6">
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
+            <div className="grid lg:grid-cols-1 gap-6 animate-slide-in-blur">
+              <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
+                isDarkMode 
+                  ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
+                  : 'bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40 shadow-lg'
+              }`}>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className={`text-lg font-semibold ${
+                    isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>
                     Recent Reports
-                    <Button variant="outline" size="sm" onClick={() => setActiveTab('reports')}>
-                      View All
-                    </Button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {recentReports.slice(0, 3).map((report) => (
-                    <div key={report._id || report.id || report.publicId} className="flex items-center justify-between p-4 border rounded-lg">
+                  </h3>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setActiveTab('reports')}
+                    className={`transition-all duration-300 hover:scale-105 ${
+                      isDarkMode 
+                        ? 'border-white/30 bg-white/10 hover:bg-white/20 text-white' 
+                        : 'border-gray-300 bg-white hover:bg-gray-50 text-gray-700'
+                    }`}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    View All
+                  </Button>
+                </div>
+                <div className="space-y-4">
+                  {recentReports.slice(0, 3).map((report, index) => (
+                    <div 
+                      key={report._id || report.id || report.publicId} 
+                      className={`flex items-center justify-between p-4 rounded-xl backdrop-blur-md border transition-all duration-300 hover:scale-105 animate-slide-in-blur ${
+                        isDarkMode 
+                          ? 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20' 
+                          : 'bg-white/10 border-white/20 hover:bg-white/20 hover:border-white/30'
+                      }`}
+                      style={{ animationDelay: `${index * 0.1}s` }}
+                    >
                       <div className="flex items-center space-x-4">
-                        <div className="bg-blue-100 p-2 rounded-lg">
-                          <FileText className="h-5 w-5 text-blue-600" />
+                        <div className={`p-2 rounded-lg shadow-lg ${
+                          isDarkMode ? 'bg-blue-500/20' : 'bg-blue-100'
+                        }`}>
+                          <FileText className={`h-5 w-5 ${
+                            isDarkMode ? 'text-blue-400' : 'text-blue-600'
+                          }`} />
                         </div>
                         <div>
-                          <h4 className="font-semibold text-gray-900 dark:text-white">
+                          <h4 className={`font-semibold ${
+                            isDarkMode ? 'text-white' : 'text-gray-900'
+                          }`}>
                             {report.title || report.name || report.original_filename || 'Medical Report'}
                           </h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                          <p className={`text-sm ${
+                            isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                          }`}>
                             {(report.doctor && report.doctor) || (report.neurologistId ? 'Neurologist' : 'Patient')} • {report.date ? report.date : (report.createdAt ? new Date(report.createdAt).toLocaleDateString() : '')}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Badge variant="outline">{report.status}</Badge>
+                        <Badge 
+                          variant="outline" 
+                          className={`${
+                            isDarkMode 
+                              ? 'border-white/30 bg-white/10 text-white' 
+                              : 'border-gray-300 bg-white text-gray-700'
+                          }`}
+                        >
+                          {report.status}
+                        </Badge>
                         <div className="flex items-center space-x-2">
-                          <Button variant="ghost" size="sm" onClick={() => openPreview(report)}>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => openPreview(report)}
+                            className={`transition-all duration-300 hover:scale-105 ${
+                              isDarkMode 
+                                ? 'hover:bg-white/20 text-white' 
+                                : 'hover:bg-gray-100 text-gray-700'
+                            }`}
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={async () => {
-                            try {
-                              const token = localStorage.getItem('neuropath_token');
-                              const res = await fetch(`http://localhost:5000/api/reports/${report._id || report.id}`, {
-                                method: 'DELETE',
-                                headers: { 'Authorization': `Bearer ${token}` },
-                              });
-                              if (!res.ok) throw new Error('Failed to delete');
-                              toast.success('Report deleted');
-                              await fetchDashboardData();
-                            } catch (err) {
-                              console.error('Delete error:', err);
-                              toast.error('Delete failed');
-                            }
-                          }}>
-                            Delete
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={async () => {
+                              try {
+                                const token = localStorage.getItem('neuropath_token');
+                                const res = await fetch(`http://localhost:5000/api/reports/${report._id || report.id}`, {
+                                  method: 'DELETE',
+                                  headers: { 'Authorization': `Bearer ${token}` },
+                                });
+                                if (!res.ok) throw new Error('Failed to delete');
+                                toast.success('Report deleted');
+                                await fetchDashboardData();
+                              } catch (err) {
+                                console.error('Delete error:', err);
+                                toast.error('Delete failed');
+                              }
+                            }}
+                            className={`transition-all duration-300 hover:scale-105 text-red-600 hover:text-red-700 ${
+                              isDarkMode 
+                                ? 'hover:bg-red-500/20' 
+                                : 'hover:bg-red-50'
+                            }`}
+                          >
+                            <X className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
                     </div>
                   ))}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
 
             {/* Recent Prescriptions */}
-            <div className="grid lg:grid-cols-1 gap-6">
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
+            <div className="grid lg:grid-cols-1 gap-6 animate-slide-in-blur">
+              <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
+                isDarkMode 
+                  ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
+                  : 'bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40 shadow-lg'
+              }`}>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className={`text-lg font-semibold ${
+                    isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>
                     Recent Prescriptions
-                    <Button variant="outline" size="sm" onClick={() => setActiveTab('prescriptions')}>
-                      View All
-                    </Button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {recentPrescriptions.slice(0, 3).map((prescription) => (
-                    <div key={prescription._id || prescription.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  </h3>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setActiveTab('prescriptions')}
+                    className={`transition-all duration-300 hover:scale-105 ${
+                      isDarkMode 
+                        ? 'border-white/30 bg-white/10 hover:bg-white/20 text-white' 
+                        : 'border-gray-300 bg-white hover:bg-gray-50 text-gray-700'
+                    }`}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    View All
+                  </Button>
+                </div>
+                <div className="space-y-4">
+                  {recentPrescriptions.slice(0, 3).map((prescription, index) => (
+                    <div 
+                      key={prescription._id || prescription.id} 
+                      className={`flex items-center justify-between p-4 rounded-xl backdrop-blur-md border transition-all duration-300 hover:scale-105 animate-slide-in-blur ${
+                        isDarkMode 
+                          ? 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20' 
+                          : 'bg-white/10 border-white/20 hover:bg-white/20 hover:border-white/30'
+                      }`}
+                      style={{ animationDelay: `${index * 0.1}s` }}
+                    >
                       <div className="flex items-center space-x-4">
-                        <div className="bg-green-100 p-2 rounded-lg">
-                          <FileText className="h-5 w-5 text-green-600" />
+                        <div className={`p-2 rounded-lg shadow-lg ${
+                          isDarkMode ? 'bg-green-500/20' : 'bg-green-100'
+                        }`}>
+                          <Heart className={`h-5 w-5 ${
+                            isDarkMode ? 'text-green-400' : 'text-green-600'
+                          }`} />
                         </div>
                         <div>
-                          <h4 className="font-semibold text-gray-900 dark:text-white">
+                          <h4 className={`font-semibold ${
+                            isDarkMode ? 'text-white' : 'text-gray-900'
+                          }`}>
                             {prescription.medication || 'Prescription'}
                           </h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                          <p className={`text-sm ${
+                            isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                          }`}>
                             Dr. {prescription.neurologistId?.name || 'Neurologist'} • {prescription.appointmentId ? `${prescription.appointmentId.date} ${prescription.appointmentId.time}` : 'N/A'}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm" onClick={() => openPrescriptionDetails(prescription)}>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => openPrescriptionDetails(prescription)}
+                          className={`transition-all duration-300 hover:scale-105 ${
+                            isDarkMode 
+                              ? 'hover:bg-white/20 text-white' 
+                              : 'hover:bg-gray-100 text-gray-700'
+                          }`}
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
                   ))}
                   {recentPrescriptions.length === 0 && (
-                    <div className="text-center py-8">
-                      <div className="bg-gray-100 p-3 rounded-full w-12 h-12 mx-auto mb-3 flex items-center justify-center">
-                        <FileText className="h-6 w-6 text-gray-400" />
+                    <div className={`text-center py-8 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-500'
+                    }`}>
+                      <div className={`p-3 rounded-full w-12 h-12 mx-auto mb-3 flex items-center justify-center ${
+                        isDarkMode ? 'bg-gray-700' : 'bg-gray-100'
+                      }`}>
+                        <Heart className={`h-6 w-6 ${
+                          isDarkMode ? 'text-gray-400' : 'text-gray-400'
+                        }`} />
                       </div>
-                      <p className="text-gray-500">No prescriptions yet</p>
+                      <p>No prescriptions yet</p>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           </TabsContent>
 
