@@ -262,7 +262,7 @@ export const NeurologistDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem('neuropath_token');
-      const response = await fetch('http://localhost:5000/api/dashboard/neurologist', {
+      const response = await fetch(`${API_BASE}/api/dashboard/neurologist`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -307,7 +307,7 @@ export const NeurologistDashboard = () => {
       if (action === 'confirmed' || action === 'rejected') {
         // Handle approve/reject for pending appointments
         const accept = action === 'confirmed';
-        const response = await fetch(`http://localhost:5000/api/appointments/${appointmentId}/respond`, {
+        const response = await fetch(`${API_BASE}/api/appointments/${appointmentId}/respond`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -355,7 +355,7 @@ export const NeurologistDashboard = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/reports/patient/${patientId}`, {
+      const response = await fetch(`${API_BASE}/api/reports/patient/${patientId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
