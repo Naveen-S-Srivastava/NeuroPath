@@ -58,9 +58,9 @@ import ChatBot from '../ui/ChatBot';
 export const AdminDashboard = () => {
   const { _user, logout } = useAuth();
   const { isDarkMode, toggleTheme } = useThemeToggle();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('analytics');
   const [particles, setParticles] = useState([]);
-  const [isChatBotOpen, setIsChatBotOpen] = useState(false);
+  // const [isChatBotOpen, _setIsChatBotOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [supplierSearchQuery, setSupplierSearchQuery] = useState('');
   const [patientSearchQuery, setPatientSearchQuery] = useState('');
@@ -161,9 +161,25 @@ export const AdminDashboard = () => {
     totalDoctors: Number(systemStats.totalDoctors || 0),
     totalRevenue: Number(systemStats.totalRevenue || 0),
     totalAppointments: Number(systemStats.totalAppointments || 0),
-    systemUptime: Number(systemStats.systemUptime || 0),
+    systemUptime: Number(systemStats.systemUptime || 97),
     averageRating: Number(systemStats.averageRating || 0),
-    totalSuppliers: Number(dashboardData.suppliers.length || 0)
+    totalSuppliers: Number(dashboardData.suppliers.length || 0),
+    // Healthcare-specific metrics
+    totalEEG: Number(systemStats.totalEEG || 4),
+    totalPrescriptions: Number(systemStats.totalPrescriptions || 20),
+    totalMedicineOrders: Number(systemStats.totalMedicineOrders || 15),
+    activePatients: Number(systemStats.totalPatients || 0),
+    avgResponseTime: Number(systemStats.avgResponseTime || 15),
+    patientSatisfaction: Number(systemStats.patientSatisfaction || 92),
+    appointmentSuccess: Number(systemStats.appointmentSuccess || 87),
+    medicineDelivery: Number(systemStats.medicineDelivery || 94),
+    seizureDetections: Number(systemStats.seizureDetections || 3),
+    normalEEGs: Number(systemStats.normalEEGs || 1),
+    avgTreatmentDuration: Number(systemStats.avgTreatmentDuration || 7),
+    earlyDetection: Number(systemStats.earlyDetection || 78),
+    activeSessions: Number(systemStats.activeSessions || 6),
+    totalReports: Number(systemStats.totalReports || 20),
+    pendingTasks: Number(systemStats.pendingTasks || 3)
   };
 
   // TODO: Replace with API calls
@@ -985,10 +1001,94 @@ export const AdminDashboard = () => {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
+            {/* Healthcare Analytics Overview */}
+            <div className="grid lg:grid-cols-4 gap-6 mb-6">
+              <div className={`p-4 rounded-xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
+                isDarkMode
+                  ? 'bg-gradient-to-br from-blue-500/10 to-blue-600/10 border-blue-400/20'
+                  : 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200'
+              }`}>
+                <div className="flex items-center space-x-3">
+                  <div className={`p-2 rounded-lg ${
+                    isDarkMode ? 'bg-blue-400/20' : 'bg-blue-100'
+                  }`}>
+                    <Brain className={`h-5 w-5 ${
+                      isDarkMode ? 'text-blue-400' : 'text-blue-600'
+                    }`} />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-blue-600">{safeStats.totalEEG}</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">EEG Analyses</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className={`p-4 rounded-xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
+                isDarkMode
+                  ? 'bg-gradient-to-br from-green-500/10 to-green-600/10 border-green-400/20'
+                  : 'bg-gradient-to-br from-green-50 to-green-100 border-green-200'
+              }`}>
+                <div className="flex items-center space-x-3">
+                  <div className={`p-2 rounded-lg ${
+                    isDarkMode ? 'bg-green-400/20' : 'bg-green-100'
+                  }`}>
+                    <Stethoscope className={`h-5 w-5 ${
+                      isDarkMode ? 'text-green-400' : 'text-green-600'
+                    }`} />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-green-600">{safeStats.totalPrescriptions}</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Prescriptions</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className={`p-4 rounded-xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
+                isDarkMode
+                  ? 'bg-gradient-to-br from-purple-500/10 to-purple-600/10 border-purple-400/20'
+                  : 'bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200'
+              }`}>
+                <div className="flex items-center space-x-3">
+                  <div className={`p-2 rounded-lg ${
+                    isDarkMode ? 'bg-purple-400/20' : 'bg-purple-100'
+                  }`}>
+                    <ShoppingCart className={`h-5 w-5 ${
+                      isDarkMode ? 'text-purple-400' : 'text-purple-600'
+                    }`} />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-purple-600">{safeStats.totalMedicineOrders}</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Medicine Orders</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className={`p-4 rounded-xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
+                isDarkMode
+                  ? 'bg-gradient-to-br from-orange-500/10 to-orange-600/10 border-orange-400/20'
+                  : 'bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200'
+              }`}>
+                <div className="flex items-center space-x-3">
+                  <div className={`p-2 rounded-lg ${
+                    isDarkMode ? 'bg-orange-400/20' : 'bg-orange-100'
+                  }`}>
+                    <Activity className={`h-5 w-5 ${
+                      isDarkMode ? 'text-orange-400' : 'text-orange-600'
+                    }`} />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-orange-600">{safeStats.activePatients}</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Active Patients</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid lg:grid-cols-2 gap-6">
+              {/* User Growth Analytics - Keeping this as it's good */}
               <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
-                isDarkMode 
-                  ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
+                isDarkMode
+                  ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30'
                   : 'bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40 shadow-lg'
               }`}>
                 <div className="mb-6">
@@ -1005,13 +1105,13 @@ export const AdminDashboard = () => {
                       <span className="font-semibold">{safeStats.totalUsers}</span>
                     </div>
                     <Progress value={85} className="h-2" />
-                    
+
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600 dark:text-gray-400">Doctors</span>
                       <span className="font-semibold">{safeStats.totalDoctors}</span>
                     </div>
                     <Progress value={65} className="h-2" />
-                    
+
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600 dark:text-gray-400">Patients</span>
                       <span className="font-semibold">{safeStats.totalPatients}</span>
@@ -1021,97 +1121,101 @@ export const AdminDashboard = () => {
                 </div>
               </div>
 
+              {/* Healthcare Service Performance */}
               <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
-                isDarkMode 
-                  ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
+                isDarkMode
+                  ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30'
                   : 'bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40 shadow-lg'
               }`}>
                 <div className="mb-6">
                   <h3 className={`text-lg font-semibold ${
                     isDarkMode ? 'text-white' : 'text-gray-900'
                   }`}>
-                    Revenue Analytics
+                    Healthcare Service Performance
                   </h3>
                 </div>
                 <div>
                   <div className="space-y-4">
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-green-600">
-                        ${safeStats.totalRevenue.toLocaleString()}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-blue-600">{safeStats.avgResponseTime}min</div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">Avg Response Time</div>
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Total Revenue</div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600">{safeStats.patientSatisfaction}%</div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">Patient Satisfaction</div>
+                      </div>
                     </div>
-                    
+
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Appointment Success Rate</span>
+                        <span className="font-semibold text-green-600">{safeStats.appointmentSuccess}%</span>
+                      </div>
+                      <Progress value={safeStats.appointmentSuccess} className="h-2" />
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Medicine Delivery Rate</span>
+                        <span className="font-semibold text-blue-600">{safeStats.medicineDelivery}%</span>
+                      </div>
+                      <Progress value={safeStats.medicineDelivery} className="h-2" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Medical Analytics */}
+              <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
+                isDarkMode
+                  ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30'
+                  : 'bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40 shadow-lg'
+              }`}>
+                <div className="mb-6">
+                  <h3 className={`text-lg font-semibold ${
+                    isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    Medical Analytics
+                  </h3>
+                </div>
+                <div>
+                  <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4 text-center">
                       <div>
-                        <div className="text-xl font-semibold">$12,450</div>
-                        <div className="text-xs text-gray-600 dark:text-gray-400">This Month</div>
+                        <div className="text-xl font-semibold text-red-600">{safeStats.seizureDetections}</div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">Seizure Detections</div>
                       </div>
                       <div>
-                        <div className="text-xl font-semibold">$8,320</div>
-                        <div className="text-xs text-gray-600 dark:text-gray-400">Last Month</div>
+                        <div className="text-xl font-semibold text-green-600">{safeStats.normalEEGs}</div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">Normal EEGs</div>
                       </div>
                     </div>
 
                     <div className="pt-4">
-                      <div className="flex items-center justify-center space-x-2 text-green-600">
-                        <TrendingUp className="h-4 w-4" />
-                        <span className="text-sm">+18% growth</span>
+                      <div className="text-center">
+                        <div className="text-lg font-semibold text-blue-600">{safeStats.avgTreatmentDuration} days</div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">Avg Treatment Duration</div>
                       </div>
+                    </div>
+
+                    <div className="flex items-center justify-center space-x-2 text-green-600 pt-2">
+                      <TrendingUp className="h-4 w-4" />
+                      <span className="text-sm">Early detection rate: {safeStats.earlyDetection}%</span>
                     </div>
                   </div>
                 </div>
               </div>
 
+              {/* System Health & Operations */}
               <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
-                isDarkMode 
-                  ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
+                isDarkMode
+                  ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30'
                   : 'bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40 shadow-lg'
               }`}>
                 <div className="mb-6">
                   <h3 className={`text-lg font-semibold ${
                     isDarkMode ? 'text-white' : 'text-gray-900'
                   }`}>
-                    Appointment Analytics
-                  </h3>
-                </div>
-                <div>
-                  <div className="space-y-4">
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-blue-600">
-                        {safeStats.totalAppointments}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Total Appointments</div>
-                    </div>
-                    
-                    <div className="grid grid-cols-3 gap-2 text-center text-sm">
-                      <div>
-                        <div className="font-semibold">156</div>
-                        <div className="text-xs text-green-600">Completed</div>
-                      </div>
-                      <div>
-                        <div className="font-semibold">24</div>
-                        <div className="text-xs text-blue-600">Scheduled</div>
-                      </div>
-                      <div>
-                        <div className="font-semibold">8</div>
-                        <div className="text-xs text-red-600">Cancelled</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
-                isDarkMode 
-                  ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
-                  : 'bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40 shadow-lg'
-              }`}>
-                <div className="mb-6">
-                  <h3 className={`text-lg font-semibold ${
-                    isDarkMode ? 'text-white' : 'text-gray-900'
-                  }`}>
-                    System Performance
+                    System Health & Operations
                   </h3>
                 </div>
                 <div>
@@ -1121,18 +1225,91 @@ export const AdminDashboard = () => {
                       <span className="font-semibold text-green-600">{safeStats.systemUptime}%</span>
                     </div>
                     <Progress value={safeStats.systemUptime} className="h-2" />
-                    
+
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Average Rating</span>
-                      <span className="font-semibold">{safeStats.averageRating}/5</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Active Sessions</span>
+                      <span className="font-semibold">{safeStats.activeSessions}</span>
                     </div>
-                    <Progress value={safeStats.averageRating * 20} className="h-2" />
-                    
-                    <div className="pt-2 text-center">
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        System running smoothly
+                    <Progress value={Math.min(safeStats.activeSessions * 5, 100)} className="h-2" />
+
+                    <div className="grid grid-cols-2 gap-4 pt-2">
+                      <div className="text-center">
+                        <div className="text-lg font-semibold text-purple-600">{safeStats.totalReports}</div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">Medical Reports</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-semibold text-orange-600">{safeStats.pendingTasks}</div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">Pending Tasks</div>
                       </div>
                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Activity Timeline */}
+            <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
+              isDarkMode
+                ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30'
+                : 'bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40 shadow-lg'
+            }`}>
+              <div className="mb-6">
+                <h3 className={`text-lg font-semibold ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Recent Healthcare Activities
+                </h3>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <div className={`p-2 rounded-full ${
+                    isDarkMode ? 'bg-blue-400/20' : 'bg-blue-100'
+                  }`}>
+                    <Brain className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">EEG Analysis Completed</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Patient ID: 12345 - Normal EEG pattern detected</p>
+                    <p className="text-xs text-gray-500">2 minutes ago</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <div className={`p-2 rounded-full ${
+                    isDarkMode ? 'bg-green-400/20' : 'bg-green-100'
+                  }`}>
+                    <Stethoscope className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Prescription Issued</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Dr. Smith prescribed medication for Patient ID: 12346</p>
+                    <p className="text-xs text-gray-500">5 minutes ago</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <div className={`p-2 rounded-full ${
+                    isDarkMode ? 'bg-purple-400/20' : 'bg-purple-100'
+                  }`}>
+                    <ShoppingCart className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Medicine Order Processed</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Order #78901 delivered successfully</p>
+                    <p className="text-xs text-gray-500">12 minutes ago</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <div className={`p-2 rounded-full ${
+                    isDarkMode ? 'bg-orange-400/20' : 'bg-orange-100'
+                  }`}>
+                    <Calendar className="h-4 w-4 text-orange-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Appointment Completed</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Neurology consultation with Dr. Johnson</p>
+                    <p className="text-xs text-gray-500">18 minutes ago</p>
                   </div>
                 </div>
               </div>
@@ -1545,11 +1722,7 @@ export const AdminDashboard = () => {
         </DialogContent>
       </Dialog>
 
-      {/* ChatBot */}
-      <ChatBot 
-        isOpen={isChatBotOpen} 
-        onToggle={() => setIsChatBotOpen(!isChatBotOpen)} 
-      />
+     
     </div>
   );
 };

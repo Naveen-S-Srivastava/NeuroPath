@@ -716,18 +716,7 @@ export const NeurologistDashboard = () => {
                 <Settings className="h-4 w-4 mr-2" />
                 Theme
               </Button>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className={`px-4 py-2 rounded-xl border backdrop-blur-md transition-all duration-300 hover:scale-105 ${
-                  isDarkMode 
-                    ? 'border-white/20 bg-white/10 hover:bg-white/20 text-white' 
-                    : 'border-gray-300 bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700 shadow-sm hover:shadow-md'
-                }`}
-              >
-                <Bell className="h-4 w-4 mr-2" />
-                Notifications
-              </Button>
+
               <Button 
                 variant="ghost" 
                 size="sm"
@@ -1179,6 +1168,7 @@ export const NeurologistDashboard = () => {
                    </div>
                    <div className="space-y-3">
                      <Button 
+                       onClick={() => setActiveTab('prescriptions')}
                        className={`w-full justify-start transition-all duration-300 hover:scale-105 ${
                          isDarkMode 
                            ? 'bg-blue-600 hover:bg-blue-700 text-white' 
@@ -1189,6 +1179,7 @@ export const NeurologistDashboard = () => {
                       New Prescription
                     </Button>
                      <Button 
+                       onClick={() => setActiveTab('patients')}
                        variant="outline" 
                        className={`w-full justify-start transition-all duration-300 hover:scale-105 ${
                          isDarkMode 
@@ -1200,6 +1191,7 @@ export const NeurologistDashboard = () => {
                       Message Patient
                     </Button>
                      <Button 
+                       onClick={() => setActiveTab('appointments')}
                        variant="outline" 
                        className={`w-full justify-start transition-all duration-300 hover:scale-105 ${
                          isDarkMode 
@@ -1211,6 +1203,7 @@ export const NeurologistDashboard = () => {
                       Schedule Appointment
                     </Button>
                      <Button 
+                       onClick={() => setActiveTab('medicine')}
                        variant="outline" 
                        className={`w-full justify-start transition-all duration-300 hover:scale-105 ${
                          isDarkMode 
@@ -1219,7 +1212,7 @@ export const NeurologistDashboard = () => {
                        }`}
                      >
                       <BarChart3 className="h-4 w-4 mr-2" />
-                      View Analytics
+                      Medicine Order 
                     </Button>
                    </div>
                  </div>
