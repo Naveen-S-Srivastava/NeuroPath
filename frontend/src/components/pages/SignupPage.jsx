@@ -10,6 +10,8 @@ import { useAuth } from '../context/AuthContext';
 import { ImageWithFallback } from '../ui/ImageWithFallback';
 import { BackendHealth } from '../ui/BackendHealth';
 import { useThemeToggle } from '../hooks/useTheme';
+
+import logo from '../../../public/logo.png';
 import { 
   Brain, 
   Eye, 
@@ -233,9 +235,9 @@ export const SignupPage = () => {
               <div className="space-y-6">
                 <div className="flex items-center space-x-3">
                   <Link to="/">
-                  <div className={`p-3 rounded-2xl bg-gradient-to-r ${selectedRole?.gradient || 'from-blue-500 to-blue-600'} shadow-lg backdrop-blur-sm`}>
-                    <Brain className="h-8 w-8 text-white" />
-                  </div>
+                  <div>
+                     <img className="h-12 w-12 "  src={logo}/>
+           </div>
                   </Link>
                   <span className={`text-3xl font-bold ${
                     isDarkMode ? 'text-white' : 'text-gray-900'

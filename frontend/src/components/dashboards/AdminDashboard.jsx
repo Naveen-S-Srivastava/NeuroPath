@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Progress } from '../ui/progress';
 import { toast } from 'sonner';
+
+import logo from '../../../public/logo.png';
 import { 
   Table, 
   TableBody, 
@@ -535,13 +537,10 @@ export const AdminDashboard = () => {
                 }`}
                 onClick={() => window.location.href = '/'}
               >
-                <div className={`p-1.5 rounded-lg transition-all duration-300 ${
-                  isDarkMode 
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg' 
-                    : 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-md'
-                }`}>
-                  <Brain className="h-4 w-4 text-white" />
-                </div>
+<div>
+     <img className="h-12 w-12 text-white"  src={logo}/>
+           
+</div>
                 <span className={`text-lg font-bold transition-all duration-300 ${
                   isDarkMode ? 'text-white' : 'text-gray-900'
                 }`}>
@@ -986,7 +985,7 @@ export const AdminDashboard = () => {
                             size="sm"
                             onClick={() => handleViewSupplier(supplier)}
                           >
-                            View Details
+                            <Eye className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>

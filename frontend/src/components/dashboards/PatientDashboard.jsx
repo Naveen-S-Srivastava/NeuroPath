@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+
+import logo from '../../../public/logo.png';
 import { Badge } from '../ui/badge';
 import { Input } from '../ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -738,13 +740,7 @@ export const PatientDashboard = () => {
                 }`}
                 onClick={() => window.location.href = '/'}
               >
-                <div className={`p-1.5 rounded-lg transition-all duration-300 ${
-                  isDarkMode 
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg' 
-                    : 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-md'
-                }`}>
-                  <Brain className="h-4 w-4 text-white" />
-                </div>
+                <div><img className="h-12 w-12 text-white"  src={logo}/></div>
                 <span className={`text-lg font-bold transition-all duration-300 ${
                   isDarkMode ? 'text-white' : 'text-gray-900'
                 }`}>
@@ -1778,9 +1774,9 @@ export const PatientDashboard = () => {
                 <div className="flex-1 p-4 space-y-4 overflow-y-auto">
                   {chatMessagesState.map((m, idx) => {
                     const msg = m.message ? m.message : m;
-                    const isPatient = (msg.senderId && String(msg.senderId) === String(user?.id)) || (m.from && String(m.from) === String(user?.id));
+                    const isPatient = (msg.senderId && String(msg.senderId._id) === String(user?._id)) || (m.from && String(m.from) === String(user?._id));
                     return (
-                      <div key={msg._id || m.id || idx} className={`flex ${isPatient ? 'justify-start' : 'justify-end'}`}>
+                      <div key={msg._id || m._id || idx} className={`flex ${isPatient ? 'justify-start' : 'justify-end'}`}>
                         <div className={`max-w-xs px-4 py-2 rounded-lg ${isPatient ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white' : 'bg-blue-600 text-white'}`}>
                           <p className="text-sm">{msg.content || m.content}</p>
                           <p className={`text-xs mt-1 ${isPatient ? 'text-gray-600 dark:text-gray-400' : 'text-blue-100'}`}>

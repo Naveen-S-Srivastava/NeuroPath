@@ -9,7 +9,7 @@ class FastAPIChatService {
   }
 
   // Initialize the service with API credentials
-  initialize(apiKey, baseUrl = 'http://localhost:8000') {
+  initialize(apiKey, baseUrl = 'http://localhost:5000') {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.isConnected = true;
@@ -50,29 +50,13 @@ class FastAPIChatService {
   // Health check (updated for your friend's API)
   async healthCheck() {
     try {
-      // First try the dedicated health endpoint
-      const healthResponse = await fetch(`${this.baseUrl}/health`);
-      if (healthResponse.ok) {
-        console.log('Health endpoint working');
-        return true;
-      }
-      
-      // Fallback: test with a simple message
-      const response = await fetch(`${this.baseUrl}/chat`, {
-        method: 'POST',
+      const response = await fetch(`${this.baseUrl}/health`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          user_message: "test"
-        }),
       });
-      
-      if (response.ok) {
-        const data = await response.json();
-        return data.reply && data.reply.length > 0;
-      }
-      return false;
+      return response.ok;
     } catch (error) {
       console.error('Health check error:', error);
       return false;

@@ -5,6 +5,8 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { ImageWithFallback } from '../ui/ImageWithFallback';
+
+import logo from '../../../public/logo.png';
 import { 
   ArrowLeft, 
   Shield, 
@@ -98,8 +100,9 @@ export const SupplierLoginPage = () => {
               <div className="space-y-6">
                 <div className="flex items-center space-x-3">
                   <Link to="/">
-                  <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-500 to-teal-600 shadow-lg">
-                    <Shield className="h-8 w-8 text-white" />
+                 <div>
+                     <img className="h-12 w-12 text-white"  src={logo}/>
+           
                   </div>
                   </Link>
                   <span className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -157,8 +160,9 @@ export const SupplierLoginPage = () => {
               <Card className="shadow-2xl border-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm">
                 <CardHeader className="space-y-1 pb-8">
                   <div className="flex items-center justify-center space-x-3 mb-4">
-                    <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-500 to-teal-600 shadow-lg">
-                      <Shield className="h-6 w-6 text-white" />
+                    <div>
+                         <img className="h-12 w-12"  src={logo}/>
+           
                     </div>
                   </div>
                   <CardTitle className="text-2xl text-center text-gray-900 dark:text-white">
@@ -237,7 +241,7 @@ export const SupplierLoginPage = () => {
                         </>
                       ) : (
                         <>
-                          <Shield className="mr-2 h-5 w-5" />
+                          {/* <Shield className="mr-2 h-5 w-5" /> */}
                           Sign In
                         </>
                       )}

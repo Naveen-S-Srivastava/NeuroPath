@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useAuth } from '../context/AuthContext';
 import { useThemeToggle } from '../hooks/useTheme';
 import { toast } from 'sonner';
+
+import logo from '../../../public/logo.png';
 import {
   Calendar,
   Users,
@@ -674,13 +676,8 @@ export const NeurologistDashboard = () => {
                 }`}
                 onClick={() => window.location.href = '/'}
               >
-                <div className={`p-1.5 rounded-lg transition-all duration-300 ${
-                  isDarkMode 
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg' 
-                    : 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-md'
-                }`}>
-                  <Brain className="h-4 w-4 text-white" />
-                </div>
+               <div>   <img className="h-12 w-12 text-white"  src={logo}/>
+           </div>
                 <span className={`text-lg font-bold transition-all duration-300 ${
                   isDarkMode ? 'text-white' : 'text-gray-900'
                 }`}>
@@ -730,19 +727,7 @@ export const NeurologistDashboard = () => {
             <Plus className="h-4 w-4 mr-2" />
             Create Prescription
                 </Button>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => {/* Navigate to profile page */}}
-                className={`px-4 py-2 rounded-xl border backdrop-blur-md transition-all duration-300 hover:scale-105 ${
-                  isDarkMode 
-                    ? 'border-white/20 bg-white/10 hover:bg-white/20 text-white' 
-                    : 'border-gray-300 bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700 shadow-sm hover:shadow-md'
-                }`}
-              >
-                <User className="h-4 w-4 mr-2" />
-                Profile
-              </Button>
+              
               <Button 
                 variant="ghost" 
                 size="sm"

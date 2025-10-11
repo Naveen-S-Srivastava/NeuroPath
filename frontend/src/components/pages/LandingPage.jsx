@@ -4,6 +4,8 @@ import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { ImageWithFallback } from '../ui/ImageWithFallback';
+
+import logo from '../../../public/logo.png';
 import { 
   Brain, 
   Calendar, 
@@ -566,9 +568,8 @@ export const LandingPage = () => {
             {/* Brand Section */}
             <div className="md:col-span-2 space-y-6">
               <div className="flex items-center space-x-3">
-                <div className="bg-gradient-to-br from-blue-600 to-teal-600 p-3 rounded-xl">
-                  <Brain className="h-8 w-8 text-white" />
-                </div>
+                 <img className="h-12 w-12 text-white"  src={logo}/>
+           
                 <span className="text-2xl font-bold">NeuroPath</span>
               </div>
               <p className="text-gray-400 leading-relaxed max-w-md">

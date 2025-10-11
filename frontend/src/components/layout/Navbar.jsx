@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { _useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { useAuth } from '../context/AuthContext';
+import logo from '../../../public/logo.png';
 import { 
   Brain, 
   Menu, 
@@ -51,12 +52,8 @@ export const Navbar = ({
             }`}
             onClick={() => navigate('/')}
           >
-            <div className={`p-2 rounded-lg transition-all duration-300 ${
-              isDarkMode 
-                ? 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg' 
-                : 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-md'
-            }`}>
-              <Brain className="h-6 w-6 text-white" />
+            <div>
+                 <img className="h-12 w-12 text-black"  src={logo}/>
             </div>
             <span className={`text-xl font-bold transition-all duration-300 ${
               isDarkMode ? 'text-white' : 'text-gray-900'

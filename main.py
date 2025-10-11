@@ -9,7 +9,7 @@ from datetime import datetime
 # ================================
 # Configuration
 # ================================
-API_KEY ="test-key"  # 🔒 Replace with your actual key
+API_KEY ="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"  # 🔒 Replace with your actual key
 # API_KEY = "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"  # 🔒 Replace with your actual key
 UPLOAD_DIR = "uploads"
 MODEL_PATH = "eeg_models/best_eeg_model.pth"

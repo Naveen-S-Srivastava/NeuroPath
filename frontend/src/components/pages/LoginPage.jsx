@@ -6,6 +6,8 @@ import { Label } from '../ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Checkbox } from '../ui/checkbox';
+
+import logo from '../../../public/logo.png';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,7 +41,7 @@ import { toast } from 'sonner';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
-  const { login, isLoading, user, logout, updateUser } = useAuth();
+  const { _login, isLoading, _user, _logout, updateUser } = useAuth();
   const { isDarkMode } = useThemeToggle();
   const [formData, setFormData] = useState({
     email: '',
@@ -368,9 +370,8 @@ export const LoginPage = () => {
               <div className="space-y-6">
                 <div className="flex items-center space-x-3">
                   <Link to="/">
-                  <div className={`p-3 rounded-2xl bg-gradient-to-r ${selectedRole?.gradient || 'from-blue-500 to-blue-600'} shadow-lg backdrop-blur-sm`}>
-                    <Brain className="h-8 w-8 text-white" />
-                  </div>
+                     <img className="h-12 w-12 text-white"  src={logo}/>
+           
                   </Link>
                   <span className={`text-3xl font-bold ${
                     isDarkMode ? 'text-white' : 'text-gray-900'
@@ -898,7 +899,7 @@ export const LoginPage = () => {
                       </>
                     ) : (
                             <>
-                              <Sparkles className="mr-2 h-5 w-5" />
+                              {/* <Sparkles className="mr-2 h-5 w-5" /> */}
                               {formData.role === 'patient' ? 'Verify & Continue' : 'Sign In'}
                             </>
                           )}

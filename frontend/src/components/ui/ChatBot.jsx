@@ -5,6 +5,7 @@ import { Card } from '../ui/card';
 import { useThemeToggle } from '../hooks/useTheme';
 import FastAPIChatService from '../../services/fastAPIChatService';
 import EEGPredictionService from '../../services/eegPredictionService';
+import AlzheimerPredictionService from '../../services/alzheimerPredictionService';
 import {
   MessageCircle,
   Send,
@@ -21,7 +22,9 @@ import {
   Settings,
   Zap,
   Upload,
-  FileText
+  FileText,
+  Image,
+  Camera
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -33,14 +36,18 @@ const ChatBot = ({ isOpen, onToggle }) => {
   const [isMinimized, _setIsMinimized] = useState(false);
   const [fastAPIService] = useState(new FastAPIChatService());
   const [eegService] = useState(new EEGPredictionService());
+  const [alzheimerService] = useState(new AlzheimerPredictionService());
   const [useAI, setUseAI] = useState(false);
   const [aiConnected, setAiConnected] = useState(false);
   const [eegConnected, setEegConnected] = useState(false);
+  const [alzheimerConnected, setAlzheimerConnected] = useState(false);
   const [sessionId] = useState(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
+  const imageInputRef = useRef(null);
 
   // Predefined responses for common queries
   const predefinedResponses = {
@@ -119,8 +126,14 @@ const ChatBot = ({ isOpen, onToggle }) => {
 
   // Initialize FastAPI service when component mounts
   useEffect(() => {
+    // Clear any old cached URLs and force correct ports
+    localStorage.removeItem('neuropath_ai_api_url');
+    localStorage.setItem('neuropath_ai_api_url', 'http://localhost:5000');
+    localStorage.setItem('neuropath_backend_url', 'http://localhost:5000');
+    localStorage.setItem('neuropath_alzheimer_api_url', 'http://localhost:8000');
+    
     // Check if API URL is available in localStorage
-    const apiUrl = localStorage.getItem('neuropath_ai_api_url');
+    const apiUrl = localStorage.getItem('neuropath_ai_api_url') || 'http://localhost:5000';
     if (apiUrl) {
       initializeAI(apiUrl);
     }
@@ -128,9 +141,14 @@ const ChatBot = ({ isOpen, onToggle }) => {
     // Initialize EEG service
     const backendUrl = localStorage.getItem('neuropath_backend_url') || 'http://localhost:5000';
     initializeEEG(backendUrl);
+
+    // Initialize Alzheimer service
+    const alzheimerUrl = localStorage.getItem('neuropath_alzheimer_api_url') || 'http://localhost:8000';
+    const alzheimerApiKey = localStorage.getItem('neuropath_alzheimer_api_key') || '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';
+    initializeAlzheimer(alzheimerApiKey, alzheimerUrl);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const initializeAI = async (baseUrl = 'http://localhost:8000') => {
+  const initializeAI = async (baseUrl = 'http://localhost:5000') => {
     try {
       console.log('Initializing AI with URL:', baseUrl);
       fastAPIService.initialize(null, baseUrl); // No API key needed for your friend's API
@@ -159,7 +177,7 @@ const ChatBot = ({ isOpen, onToggle }) => {
   };
 
   const setAPIUrl = () => {
-    const currentUrl = localStorage.getItem('neuropath_ai_api_url') || 'http://localhost:8000';
+    const currentUrl = localStorage.getItem('neuropath_ai_api_url') || 'http://localhost:5000';
     const apiUrl = prompt('Enter your FastAPI URL:', currentUrl);
     if (apiUrl) {
       localStorage.setItem('neuropath_ai_api_url', apiUrl);
@@ -192,12 +210,47 @@ const ChatBot = ({ isOpen, onToggle }) => {
     }
   };
 
+  const initializeAlzheimer = async (apiKey, baseUrl = 'http://localhost:8000') => {
+    try {
+      console.log('Initializing Alzheimer service with URL:', baseUrl);
+      alzheimerService.initialize(apiKey, baseUrl);
+
+      console.log('Testing Alzheimer health...');
+      const isHealthy = await alzheimerService.healthCheck();
+      console.log('Alzheimer Health check result:', isHealthy);
+
+      if (isHealthy) {
+        setAlzheimerConnected(true);
+        toast.success('Alzheimer Analysis service connected!');
+        console.log('Alzheimer service successfully connected');
+      } else {
+        setAlzheimerConnected(false);
+        toast.error('Alzheimer service unavailable - check if Python API server is running');
+        console.log('Alzheimer health check failed');
+      }
+    } catch (error) {
+      console.error('Failed to initialize Alzheimer service:', error);
+      setAlzheimerConnected(false);
+      toast.error('Failed to connect to Alzheimer service: ' + error.message);
+    }
+  };
+
   const setBackendUrl = () => {
     const currentUrl = localStorage.getItem('neuropath_backend_url') || 'http://localhost:5000';
     const backendUrl = prompt('Enter your Backend URL:', currentUrl);
     if (backendUrl) {
       localStorage.setItem('neuropath_backend_url', backendUrl);
       initializeEEG(backendUrl);
+    }
+  };
+
+  const setAlzheimerUrl = () => {
+    const currentUrl = localStorage.getItem('neuropath_alzheimer_api_url') || 'http://localhost:8000';
+    const alzheimerUrl = prompt('Enter your Alzheimer API URL:', currentUrl);
+    if (alzheimerUrl) {
+      localStorage.setItem('neuropath_alzheimer_api_url', alzheimerUrl);
+      const apiKey = localStorage.getItem('neuropath_alzheimer_api_key') || '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';
+      initializeAlzheimer(apiKey, alzheimerUrl);
     }
   };
 
@@ -259,6 +312,65 @@ const ChatBot = ({ isOpen, onToggle }) => {
     }
   };
 
+  const handleImageSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate image file types
+      if (!file.type.startsWith('image/') && !file.name.toLowerCase().match(/\.(jpg|jpeg|png)$/)) {
+        toast.error('Please select a valid image file (jpg, jpeg, png)');
+        return;
+      }
+      setSelectedImage(file);
+      toast.success(`Image selected: ${file.name}`);
+    }
+  };
+
+  const handleAlzheimerAnalysis = async () => {
+    if (!selectedImage) {
+      toast.error('Please select an image first');
+      return;
+    }
+
+    if (!alzheimerConnected) {
+      toast.error('Alzheimer analysis service not connected. Please check if the Python API server is running.');
+      return;
+    }
+
+    setIsTyping(true);
+
+    try {
+      const result = await alzheimerService.predictFromImage(selectedImage);
+      const formattedResult = alzheimerService.formatPredictionResults(result);
+
+      const botMessage = {
+        id: Date.now() + 1,
+        text: formattedResult,
+        sender: 'bot',
+        timestamp: new Date(),
+        source: 'alzheimer-analysis',
+        type: 'alzheimer-result'
+      };
+
+      setMessages(prev => [...prev, botMessage]);
+      setSelectedImage(null);
+      if (imageInputRef.current) {
+        imageInputRef.current.value = '';
+      }
+    } catch (error) {
+      console.error('Alzheimer analysis error:', error);
+      const errorMessage = {
+        id: Date.now() + 1,
+        text: `Error analyzing MRI image: ${error.message}`,
+        sender: 'bot',
+        timestamp: new Date(),
+        source: 'error'
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -299,13 +411,19 @@ const ChatBot = ({ isOpen, onToggle }) => {
     try {
       let botResponse;
 
-      // Check if user is asking for EEG analysis
+      // Check if user is asking for EEG analysis or Alzheimer analysis
       const message = inputMessage.toLowerCase();
       if (message.includes('eeg') || message.includes('brain') || message.includes('seizure') || message.includes('analysis')) {
         if (eegConnected) {
           botResponse = "I can help you analyze EEG data! Please upload a CSV file with your EEG signals, and I'll process it to detect seizure activity.";
         } else {
           botResponse = "EEG analysis service is currently unavailable. Please check that the backend server is running and try configuring the backend URL.";
+        }
+      } else if (message.includes('alzheimer') || message.includes('mri') || message.includes('brain scan') || message.includes('dementia') || message.includes('cognitive')) {
+        if (alzheimerConnected) {
+          botResponse = "I can help you analyze MRI brain scans for Alzheimer's disease detection! Please upload an MRI image (jpg, jpeg, or png), and I'll analyze it to assess the level of impairment.";
+        } else {
+          botResponse = "Alzheimer's analysis service is currently unavailable. Please check that the Python API server is running and try configuring the Alzheimer API URL.";
         }
       } else if (useAI && aiConnected) {
         // Use AI model for response
@@ -425,6 +543,11 @@ const ChatBot = ({ isOpen, onToggle }) => {
                   ) : (
                     <Brain className="h-3 w-3 text-gray-400 ml-1" title="EEG Analysis Disconnected" />
                   )}
+                  {alzheimerConnected ? (
+                    <Image className="h-3 w-3 text-purple-500 ml-1" title="Alzheimer Analysis Connected" />
+                  ) : (
+                    <Image className="h-3 w-3 text-gray-400 ml-1" title="Alzheimer Analysis Disconnected" />
+                  )}
                 </p>
               </div>
             </div>
@@ -454,6 +577,19 @@ const ChatBot = ({ isOpen, onToggle }) => {
                 title="Configure Backend URL"
               >
                 <Brain className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={setAlzheimerUrl}
+                className={`p-1 h-8 w-8 rounded-full ${
+                  isDarkMode 
+                    ? 'hover:bg-white/10 text-gray-400' 
+                    : 'hover:bg-gray-100 text-gray-500'
+                }`}
+                title="Configure Alzheimer API URL"
+              >
+                <Image className="h-4 w-4" />
               </Button>
               {/* <Button
                 variant="ghost"
@@ -607,6 +743,52 @@ const ChatBot = ({ isOpen, onToggle }) => {
                           disabled={isTyping}
                           size="sm"
                           className="h-7 px-3 text-xs bg-green-500 hover:bg-green-600"
+                        >
+                          <Brain className="h-3 w-3 mr-1" />
+                          Analyze
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Image Upload for Alzheimer Analysis */}
+              {alzheimerConnected && (
+                <div className="mb-3 p-3 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Image className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {selectedImage ? `Selected: ${selectedImage.name}` : 'Upload MRI brain scan for Alzheimer\'s analysis'}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        ref={imageInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageSelect}
+                        className="hidden"
+                        id="alzheimer-image-input"
+                      />
+                      <label
+                        htmlFor="alzheimer-image-input"
+                        className={`cursor-pointer px-3 py-1 text-xs rounded-md ${
+                          isDarkMode
+                            ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                            : 'bg-purple-500 hover:bg-purple-600 text-white'
+                        }`}
+                      >
+                        <Camera className="h-3 w-3 inline mr-1" />
+                        Browse
+                      </label>
+                      {selectedImage && (
+                        <Button
+                          onClick={handleAlzheimerAnalysis}
+                          disabled={isTyping}
+                          size="sm"
+                          className="h-7 px-3 text-xs bg-red-500 hover:bg-red-600"
                         >
                           <Brain className="h-3 w-3 mr-1" />
                           Analyze

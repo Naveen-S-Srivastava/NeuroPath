@@ -15,7 +15,7 @@ app.add_middleware(
 )
 
 # OPENROUTER_API_KEY = "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"
-OPENROUTER_API_KEY = ""
+OPENROUTER_API_KEY = "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"
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 MODEL_ID = "meta-llama/llama-3.3-70b-instruct:free"
 
@@ -75,3 +75,8 @@ def chat_with_neuro_assistant(request: ChatRequest):
         return ChatResponse(reply=reply)
     else:
         raise HTTPException(status_code=response.status_code, detail=response.text)
+
+# Run the server
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=5000)
