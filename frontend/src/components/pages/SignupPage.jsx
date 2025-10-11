@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -43,9 +43,9 @@ export const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
-  const [isAnimating, setIsAnimating] = useState(true);
-  const [formVisible, setFormVisible] = useState(false);
-  const [benefitsVisible, setBenefitsVisible] = useState(false);
+  const [_isAnimating, setIsAnimating] = useState(true);
+  const [_formVisible, setFormVisible] = useState(false);
+  const [_benefitsVisible, setBenefitsVisible] = useState(false);
   const [particles, setParticles] = useState([]);
 
   const roles = [
@@ -227,27 +227,16 @@ export const SignupPage = () => {
       <div className="relative z-10 py-12 px-4">
         <div className="max-w-7xl mx-auto">
         {/* Back Button */}
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/')}
-          className={`mb-8 px-6 py-3 rounded-xl border-2 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 ${
-            isDarkMode 
-              ? 'text-white border-white/30 bg-white/10 hover:bg-white/20 hover:border-white/50' 
-              : 'text-gray-800 border-gray-300 bg-white hover:bg-gray-50 hover:border-gray-400'
-          }`}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Home
-        </Button>
-
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
             {/* Left Side - Info and Benefits */}
             <div className="space-y-8">
               <div className="space-y-6">
                 <div className="flex items-center space-x-3">
+                  <Link to="/">
                   <div className={`p-3 rounded-2xl bg-gradient-to-r ${selectedRole?.gradient || 'from-blue-500 to-blue-600'} shadow-lg backdrop-blur-sm`}>
                     <Brain className="h-8 w-8 text-white" />
                   </div>
+                  </Link>
                   <span className={`text-3xl font-bold ${
                     isDarkMode ? 'text-white' : 'text-gray-900'
                   }`}>
@@ -309,35 +298,11 @@ export const SignupPage = () => {
                 </div>
               </div>
 
-              {/* Role Info */}
-              {selectedRole && (
-                <div className={`p-8 rounded-3xl backdrop-blur-sm border shadow-2xl transition-all duration-500 hover:scale-105 ${
-                  isDarkMode 
-                    ? 'border-white/10 bg-gradient-to-br from-white/5 to-white/10' 
-                    : 'border-gray-200 bg-gradient-to-br from-white/90 to-gray-50'
-                }`}>
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className={`p-3 rounded-2xl bg-gradient-to-r ${selectedRole.gradient} shadow-lg`}>
-                      <selectedRole.icon className="h-8 w-8 text-white" />
-                    </div>
-                    <h4 className={`text-2xl font-bold ${
-                      isDarkMode ? 'text-white' : 'text-gray-900'
-                    }`}>
-                      {selectedRole.label} Account
-                    </h4>
-                  </div>
-                  <p className={`text-lg leading-relaxed ${
-                    isDarkMode ? 'text-gray-300' : 'text-gray-600'
-                  }`}>
-                    {selectedRole.description}
-                  </p>
-                </div>
-              )}
             </div>
 
             {/* Right Side - Signup Form */}
             <div className="w-full max-w-lg mx-auto lg:max-w-md">
-              <BackendHealth />
+              
               <div className={`p-6 md:p-8 rounded-3xl shadow-2xl hover-glow ${
                 isDarkMode 
                   ? 'glass-premium-dark' 
@@ -636,7 +601,6 @@ export const SignupPage = () => {
                           </>
                         ) : (
                           <>
-                            <Sparkles className="mr-2 h-5 w-5" />
                             Create Account
                           </>
                         )}

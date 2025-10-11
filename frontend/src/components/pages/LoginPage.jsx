@@ -6,6 +6,12 @@ import { Label } from '../ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Checkbox } from '../ui/checkbox';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
 import { useAuth } from '../context/AuthContext';
 import { useThemeToggle } from '../hooks/useTheme';
 import { ImageWithFallback } from '../ui/ImageWithFallback';
@@ -21,7 +27,10 @@ import {
   Sparkles,
   Zap,
   Heart,
-  Activity
+  Activity,
+  PlayCircle,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -39,6 +48,7 @@ export const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [particles, setParticles] = useState([]);
+  const [showPromoCode, setShowPromoCode] = useState(false);
 
   const roles = [
     { 
@@ -64,14 +74,35 @@ export const LoginPage = () => {
     }
   ];
 
-  const benefits = [
-    { text: 'Access to top neurologists', icon: Brain, gradient: 'from-blue-500 to-blue-600' },
-    { text: 'Secure health record management', icon: Shield, gradient: 'from-green-500 to-green-600' },
-    { text: '24/7 medical support', icon: Heart, gradient: 'from-red-500 to-red-600' },
-    { text: 'Prescription management', icon: Activity, gradient: 'from-blue-600 to-blue-700' },
-    { text: 'Video consultations', icon: Zap, gradient: 'from-gray-600 to-gray-700' },
-    { text: 'Medicine ordering', icon: Sparkles, gradient: 'from-blue-500 to-blue-600' }
+  const demoAccounts = [
+    { 
+      role: 'admin', 
+      email: 'admin@neuropath.com', 
+      password: 'admin123',
+      label: 'Admin Demo'
+    },
+    { 
+      role: 'neurologist', 
+      email: 'sarah@neuropath.com', 
+      password: 'admin123',
+      label: 'Neurologist Demo'
+    },
+    { 
+      role: 'patient', 
+      email: 'john@neuropath.com', 
+      password: 'admin123',
+      label: 'Patient Demo'
+    }
   ];
+
+  // const benefits = [
+  //   { text: 'Access to top neurologists', icon: Brain, gradient: 'from-blue-500 to-blue-600' },
+  //   { text: 'Secure health record management', icon: Shield, gradient: 'from-green-500 to-green-600' },
+  //   { text: '24/7 medical support', icon: Heart, gradient: 'from-red-500 to-red-600' },
+  //   { text: 'Prescription management', icon: Activity, gradient: 'from-blue-600 to-blue-700' },
+  //   { text: 'Video consultations', icon: Zap, gradient: 'from-gray-600 to-gray-700' },
+  //   { text: 'Medicine ordering', icon: Sparkles, gradient: 'from-blue-500 to-blue-600' }
+  // ];
 
   useEffect(() => {
     // Create floating particles
@@ -109,6 +140,19 @@ export const LoginPage = () => {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const fillDemoData = (account) => {
+    setFormData({
+      ...formData,
+      email: account.email,
+      password: account.password,
+      role: account.role,
+      promoCode: '',
+      rememberMe: false
+    });
+    setErrors({});
+    toast.success(`Filled ${account.label} credentials`);
   };
 
   const handleSubmit = async (e) => {
@@ -188,27 +232,18 @@ export const LoginPage = () => {
       <div className="relative z-10 py-12 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Back Button */}
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/')}
-            className={`mb-8 px-6 py-3 rounded-xl border-2 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 ${
-              isDarkMode 
-                ? 'text-white border-white/30 bg-white/10 hover:bg-white/20 hover:border-white/50' 
-                : 'text-gray-800 border-gray-300 bg-white hover:bg-gray-50 hover:border-gray-400'
-            }`}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Home
-          </Button>
+         
 
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
             {/* Left Side - Info and Benefits */}
             <div className="space-y-8">
               <div className="space-y-6">
                 <div className="flex items-center space-x-3">
+                  <Link to="/">
                   <div className={`p-3 rounded-2xl bg-gradient-to-r ${selectedRole?.gradient || 'from-blue-500 to-blue-600'} shadow-lg backdrop-blur-sm`}>
                     <Brain className="h-8 w-8 text-white" />
                   </div>
+                  </Link>
                   <span className={`text-3xl font-bold ${
                     isDarkMode ? 'text-white' : 'text-gray-900'
                   }`}>
@@ -223,9 +258,7 @@ export const LoginPage = () => {
                 <p className={`text-lg md:text-xl leading-relaxed ${
                   isDarkMode ? 'text-gray-300' : 'text-gray-600'
                 }`}>
-                  Sign in to access your healthcare dashboard and continue your journey 
-                  towards better neurological health.
-                </p>
+                  Sign in to access your healthcare  </p>
               </div>
 
               <div className={`relative overflow-hidden rounded-3xl shadow-2xl backdrop-blur-sm border ${
@@ -240,7 +273,40 @@ export const LoginPage = () => {
                   isDarkMode ? 'from-black/50 to-transparent' : 'from-white/20 to-transparent'
                 }`}></div>
               </div>
-              <div className="space-y-6">
+
+              {/* Sign Up Links */}
+              <div className={`p-6`}>
+                <div className="text-centeR">
+                 
+                  <div className="space-y-3 flex flex-row gap-8 text-center justify-center">
+                    <Button
+                      variant="outline"
+                      className={` h-12 rounded-xl font-semibold transition-all duration-300 ${
+                        isDarkMode 
+                          ? 'border-white/20 bg-white/5 hover:bg-white/10 text-white' 
+                          : 'border-gray-300 bg-white hover:bg-gray-50 text-gray-700'
+                      }`}
+                      onClick={() => navigate('/signup')}
+                    >
+                      <UserCheck className="mr-2 h-4 w-4" />
+                      Create Patient Account
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className={` h-12 rounded-xl font-semibold transition-all duration-300 ${
+                        isDarkMode 
+                          ? 'border-white/20 bg-white/5 hover:bg-white/10 text-white' 
+                          : 'border-gray-300 bg-white hover:bg-gray-50 text-gray-700'
+                      }`}
+                      onClick={() => navigate('/supplier-login')}
+                    >
+                      <Shield className="mr-2 h-4 w-4" />
+                      Supplier Portal
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              {/* <div className="space-y-6">
                 <h3 className={`text-2xl font-semibold ${
                   isDarkMode ? 'text-white' : 'text-gray-900'
                 }`}>
@@ -267,10 +333,10 @@ export const LoginPage = () => {
                     </div>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               {/* Role Info */}
-              {selectedRole && (
+              {/* {selectedRole && (
                 <div className={`p-8 rounded-3xl backdrop-blur-sm border shadow-2xl transition-all duration-500 hover:scale-105 ${
                   isDarkMode 
                     ? 'border-white/10 bg-gradient-to-br from-white/5 to-white/10' 
@@ -292,10 +358,10 @@ export const LoginPage = () => {
                     {selectedRole.description}
                   </p>
                 </div>
-              )}
+              )} */}
 
               {/* Test Credentials Info */}
-              <div className={`p-6 rounded-2xl backdrop-blur-sm border ${
+              {/* <div className={`p-6 rounded-2xl backdrop-blur-sm border ${
                 isDarkMode 
                   ? 'border-white/10 bg-white/5' 
                   : 'border-gray-200 bg-white/90'
@@ -315,7 +381,7 @@ export const LoginPage = () => {
                 }`}>
                   Remember to select the correct role from the dropdown!
                 </p>
-              </div>
+              </div> */}
           </div>
 
             {/* Right Side - Login Form */}
@@ -325,17 +391,52 @@ export const LoginPage = () => {
                   ? 'glass-premium-dark' 
                   : 'bg-white/95 border-gray-200 backdrop-blur-sm'
               }`}>
-                <div className="space-y-2 pb-8 text-center">
-                  <h2 className={`text-2xl md:text-3xl font-bold ${
-                    isDarkMode ? 'text-white' : 'text-gray-900'
-                  }`}>
-                    Sign In
-                  </h2>
-                  <p className={`text-base md:text-lg ${
-                    isDarkMode ? 'text-gray-300' : 'text-gray-600'
-                  }`}>
-                    Enter your credentials to access your account
-                  </p>
+                <div className="space-y-2 pb-8">
+                  <div className="flex items-center justify-between">
+                    <div className="text-center flex-1">
+                      <h2 className={`text-2xl md:text-3xl font-bold ${
+                        isDarkMode ? 'text-white' : 'text-gray-900'
+                      }`}>
+                        Sign In
+                      </h2>
+                      <p className={`text-base md:text-lg ${
+                        isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                      }`}>
+                        Enter your credentials to access your account
+                      </p>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={`ml-4 p-2 rounded-full transition-all duration-300 hover:scale-110 ${
+                            isDarkMode 
+                              ? 'hover:bg-white/10 text-gray-400 hover:text-blue-400' 
+                              : 'hover:bg-gray-100 text-gray-500 hover:text-blue-600'
+                          }`}
+                        >
+                          <PlayCircle className="h-5 w-5" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        {demoAccounts.map((account) => (
+                          <DropdownMenuItem
+                            key={account.role}
+                            onClick={() => fillDemoData(account)}
+                            className="cursor-pointer"
+                          >
+                            <div className="flex items-center space-x-2">
+                              {account.role === 'admin' && <Shield className="h-4 w-4 text-green-500" />}
+                              {account.role === 'neurologist' && <Stethoscope className="h-4 w-4 text-teal-500" />}
+                              {account.role === 'patient' && <UserCheck className="h-4 w-4 text-blue-500" />}
+                              <span>{account.label}</span>
+                            </div>
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
                 <div className="space-y-6">
                 
@@ -463,36 +564,59 @@ export const LoginPage = () => {
                     {/* Promo Code Field - Only show for patients */}
                     {formData.role === 'patient' && (
                       <div className="space-y-3">
-                        <Label htmlFor="promoCode" className={`text-base font-semibold ${
-                          isDarkMode ? 'text-white' : 'text-gray-700'
-                        }`}>
-                          Promo Code <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>(Optional)</span>
-                        </Label>
-                        <Input
-                          id="promoCode"
-                          type="text"
-                          placeholder="Enter promo code if provided by your doctor"
-                          value={formData.promoCode}
-                          onChange={(e) => handleInputChange('promoCode', e.target.value.toUpperCase())}
-                          className={`h-12 rounded-2xl backdrop-blur-sm border transition-all duration-300 ${
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={() => setShowPromoCode(!showPromoCode)}
+                          className={`w-full h-12 rounded-2xl backdrop-blur-sm border transition-all duration-300 hover-morph ${
                             errors.promoCode 
                               ? 'border-red-500 bg-red-50/50 dark:bg-red-900/20' 
                               : isDarkMode 
-                                ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40' 
-                                : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500'
-                          }`}
-                        />
-                        {errors.promoCode && (
-                          <p className="text-sm text-red-500 flex items-center space-x-1">
-                            <span>⚠️</span>
-                            <span>{errors.promoCode}</span>
-                          </p>
+                                ? 'border-white/20 bg-white/5 hover:bg-white/10' 
+                                : 'border-gray-300 bg-white hover:bg-gray-50'
+                          } flex items-center justify-between px-4`}
+                        >
+                          <span className={`text-base font-semibold ${
+                            isDarkMode ? 'text-white' : 'text-gray-700'
+                          }`}>
+                            Promo Code <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>(Optional)</span>
+                          </span>
+                          {showPromoCode ? (
+                            <ChevronUp className={`h-4 w-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+                          ) : (
+                            <ChevronDown className={`h-4 w-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+                          )}
+                        </Button>
+                        
+                        {showPromoCode && (
+                          <div className="space-y-3 animate-in slide-in-from-top-2 duration-300">
+                            <Input
+                              id="promoCode"
+                              type="text"
+                              placeholder="Enter promo code if provided by your doctor"
+                              value={formData.promoCode}
+                              onChange={(e) => handleInputChange('promoCode', e.target.value.toUpperCase())}
+                              className={`h-12 rounded-2xl backdrop-blur-sm border transition-all duration-300 ${
+                                errors.promoCode 
+                                  ? 'border-red-500 bg-red-50/50 dark:bg-red-900/20' 
+                                  : isDarkMode 
+                                    ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40' 
+                                    : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500'
+                              }`}
+                            />
+                            {errors.promoCode && (
+                              <p className="text-sm text-red-500 flex items-center space-x-1">
+                                <span>⚠️</span>
+                                <span>{errors.promoCode}</span>
+                              </p>
+                            )}
+                            <p className={`text-xs ${
+                              isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                            }`}>
+                              If you have a promo code from your doctor, enter it here to be assigned to a specific neurologist.
+                            </p>
+                          </div>
                         )}
-                        <p className={`text-xs ${
-                          isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                        }`}>
-                          If you have a promo code from your doctor, enter it here to be assigned to a specific neurologist.
-                        </p>
                       </div>
                     )}
 
@@ -556,7 +680,7 @@ export const LoginPage = () => {
                   </form>
 
                   {/* Sign Up Link */}
-                  <div className="text-center pt-6">
+                  {/* <div className="text-center pt-6">
                     <p className={`text-base ${
                       isDarkMode ? 'text-gray-300' : 'text-gray-600'
                     }`}>
@@ -586,7 +710,7 @@ export const LoginPage = () => {
                         Supplier Login
                       </Button>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>
