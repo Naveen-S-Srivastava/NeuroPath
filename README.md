@@ -90,7 +90,7 @@ To contribute to the development of NeuroPath:
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/Naveen-S-Srivastava/NeuroPath/blob/main/LICENSE.md) file for details.
 
 ---
 
