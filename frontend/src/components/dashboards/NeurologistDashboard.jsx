@@ -30,7 +30,8 @@ import {
   Stethoscope,
   Check,
   X,
-  MessageCircle
+  MessageCircle,
+  Brain
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { connectSocket, getSocket } from '../../lib/socket';
@@ -597,17 +598,30 @@ export const NeurologistDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto p-6">
-        {/* /* Header */ }
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-4">
+              <div 
+                className="flex items-center space-x-2 cursor-pointer transition-all duration-300 hover:scale-105 px-4 py-2 rounded-xl border-2 shadow-lg hover:shadow-xl backdrop-blur-md bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40"
+                onClick={() => window.location.href = '/'}
+              >
+                <div className="p-1.5 rounded-lg transition-all duration-300 bg-gradient-to-r from-blue-500 to-blue-600 shadow-md">
+                  <Brain className="h-4 w-4 text-white" />
+                </div>
+                <span className="text-lg font-bold transition-all duration-300 text-gray-900">
+                  NeuroPath
+                </span>
+              </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Namaste, Dr. {user?.name}!
+                  Namaste, Dr. {user?.name}!
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400">
-            You have {analytics.appointmentsToday} appointments today
+                  You have {analytics.appointmentsToday} appointments today
                 </p>
               </div>
+            </div>
               <div className="flex items-center space-x-4">
                 <Button variant="outline" size="sm" onClick={() => setActiveTab('prescriptions')}>
             <Plus className="h-4 w-4 mr-2" />

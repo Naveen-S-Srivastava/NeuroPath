@@ -23,6 +23,7 @@ import {
   DialogTitle,
 } from '../ui/dialog';
 import { useAuth } from '../context/AuthContext';
+import { useThemeToggle } from '../hooks/useTheme';
 import {
   Users,
   UserCheck,
@@ -44,13 +45,19 @@ import {
   Shield,
   Bell,
   Settings,
-  Weight
+  Weight,
+  Brain,
+  Sparkles,
+  LogOut,
+  User
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const AdminDashboard = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const { isDarkMode, toggleTheme } = useThemeToggle();
   const [activeTab, setActiveTab] = useState('overview');
+  const [particles, setParticles] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [supplierSearchQuery, setSupplierSearchQuery] = useState('');
   const [patientSearchQuery, setPatientSearchQuery] = useState('');
@@ -112,6 +119,18 @@ export const AdminDashboard = () => {
   };
 
   useEffect(() => {
+    // Create floating particles
+    const createParticles = () => {
+      const newParticles = Array.from({ length: 6 }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        delay: Math.random() * 6,
+        duration: 6 + Math.random() * 4,
+      }));
+      setParticles(newParticles);
+    };
+    
+    createParticles();
     fetchDashboardData();
   }, []);
   // Use API data instead of mock data
@@ -355,62 +374,232 @@ export const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto p-6">
+    <div className={`min-h-screen relative overflow-hidden transition-all duration-500 ${
+      isDarkMode 
+        ? 'bg-gradient-to-br from-gray-900 via-black to-gray-800' 
+        : 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50'
+    }`}>
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Morphing Orbs */}
+        <div className={`absolute top-20 left-20 w-32 h-32 rounded-full animate-morph opacity-20 ${
+          isDarkMode ? 'bg-white' : 'bg-blue-200'
+        }`}></div>
+        <div className={`absolute top-40 right-32 w-24 h-24 rounded-full animate-morph opacity-30 ${
+          isDarkMode ? 'bg-gray-300' : 'bg-indigo-200'
+        }`} style={{ animationDelay: '2s' }}></div>
+        <div className={`absolute bottom-32 left-1/3 w-28 h-28 rounded-full animate-morph opacity-25 ${
+          isDarkMode ? 'bg-gray-200' : 'bg-slate-200'
+        }`} style={{ animationDelay: '4s' }}></div>
+        
+        {/* Floating Particles */}
+        {particles.map((particle) => (
+          <div
+            key={particle.id}
+            className={`absolute w-2 h-2 rounded-full animate-float-slow ${
+              isDarkMode ? 'bg-white' : 'bg-blue-300'
+            }`}
+            style={{
+              left: `${particle.left}%`,
+              animationDelay: `${particle.delay}s`,
+              animationDuration: `${particle.duration}s`,
+            }}
+          />
+        ))}
+        
+        {/* Glow Effects */}
+        <div className={`absolute top-1/4 left-1/4 w-96 h-96 rounded-full animate-glow-pulse opacity-10 ${
+          isDarkMode ? 'bg-white' : 'bg-blue-200'
+        }`}></div>
+        <div className={`absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full animate-glow-pulse opacity-15 ${
+          isDarkMode ? 'bg-gray-300' : 'bg-indigo-200'
+        }`} style={{ animationDelay: '3s' }}></div>
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto p-6">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 animate-slide-in-blur">
           <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Admin Dashboard
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Manage the NeuroPath platform and monitor system health
-              </p>
-            </div>
             <div className="flex items-center space-x-4">
-              
-              <Button variant="outline" size="sm">
+              <div 
+                className={`flex items-center space-x-2 cursor-pointer transition-all duration-300 hover:scale-105 px-4 py-2 rounded-xl border-2 shadow-lg hover:shadow-xl backdrop-blur-md ${
+                  isDarkMode 
+                    ? 'text-white border-white/30 bg-white/10 hover:bg-white/20 hover:border-white/50' 
+                    : 'text-gray-800 border-white/30 bg-white/20 hover:bg-white/30 hover:border-white/40'
+                }`}
+                onClick={() => window.location.href = '/'}
+              >
+                <div className={`p-1.5 rounded-lg transition-all duration-300 ${
+                  isDarkMode 
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg' 
+                    : 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-md'
+                }`}>
+                  <Brain className="h-4 w-4 text-white" />
+                </div>
+                <span className={`text-lg font-bold transition-all duration-300 ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
+                  NeuroPath
+                </span>
+              </div>
+              <div>
+                <h1 className={`text-3xl font-bold bg-gradient-to-r ${
+                  isDarkMode 
+                    ? 'from-white to-gray-300' 
+                    : 'from-gray-900 to-gray-700'
+                } bg-clip-text text-transparent`}>
+                  Admin Dashboard
+                </h1>
+                <p className={`text-sm ${
+                  isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                }`}>
+                  Manage the NeuroPath platform and monitor system health
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={toggleTheme}
+                className={`px-4 py-2 rounded-xl border backdrop-blur-md transition-all duration-300 hover:scale-105 ${
+                  isDarkMode 
+                    ? 'border-white/20 bg-white/10 hover:bg-white/20 text-white' 
+                    : 'border-gray-300 bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700 shadow-sm hover:shadow-md'
+                }`}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Theme
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className={`px-4 py-2 rounded-xl border backdrop-blur-md transition-all duration-300 hover:scale-105 ${
+                  isDarkMode 
+                    ? 'border-white/20 bg-white/10 hover:bg-white/20 text-white' 
+                    : 'border-gray-300 bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700 shadow-sm hover:shadow-md'
+                }`}
+              >
                 <Bell className="h-4 w-4 mr-2" />
                 Alerts ({systemAlerts.length})
               </Button>
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={user?.avatar} alt={user?.name} />
-                <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
-              </Avatar>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => {/* Navigate to profile page */}}
+                className={`px-4 py-2 rounded-xl border backdrop-blur-md transition-all duration-300 hover:scale-105 ${
+                  isDarkMode 
+                    ? 'border-white/20 bg-white/10 hover:bg-white/20 text-white' 
+                    : 'border-gray-300 bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700 shadow-sm hover:shadow-md'
+                }`}
+              >
+                <User className="h-4 w-4 mr-2" />
+                Profile
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={logout}
+                className={`px-4 py-2 rounded-xl border backdrop-blur-md transition-all duration-300 hover:scale-105 ${
+                  isDarkMode 
+                    ? 'border-red-400/30 bg-red-400/10 hover:bg-red-400/20 text-red-400 hover:text-red-300' 
+                    : 'border-red-300 bg-red-50 hover:bg-red-100 hover:border-red-400 text-red-600 hover:text-red-700 shadow-sm hover:shadow-md'
+                }`}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
             </div>
           </div>
 
           {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {stats.map((stat, index) => (
-              <Card key={index} className="border-0 shadow-sm">
-                <CardContent className="p-6">
+              <div 
+                key={index} 
+                className={`transition-all duration-300 hover:scale-105 animate-slide-in-blur`}
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
+                  isDarkMode 
+                    ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
+                    : 'bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40 shadow-lg'
+                }`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{stat.title}</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      <p className={`text-sm transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                      }`}>{stat.title}</p>
+                      <p className={`text-2xl font-bold transition-colors duration-300 ${
+                        isDarkMode ? 'text-white' : 'text-gray-900'
+                      }`}>
                         {stat.value}
                       </p>
                       <p className="text-sm text-green-600">{stat.change}</p>
                     </div>
-                    <div className="p-3 rounded-full bg-gray-100 dark:bg-gray-800">
+                    <div className={`p-3 rounded-full shadow-lg transition-all duration-300 ${
+                      isDarkMode ? 'bg-white/20' : 'bg-white/80'
+                    }`}>
                       <stat.icon className={`h-6 w-6 ${stat.color}`} />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
         </div>
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="doctors">Doctors</TabsTrigger>
-            <TabsTrigger value="patients">Patients</TabsTrigger>
-            <TabsTrigger value="suppliers">Suppliers</TabsTrigger>
+          <TabsList className={`grid w-full grid-cols-4 backdrop-blur-md border transition-all duration-300 ${
+            isDarkMode 
+              ? 'bg-white/10 border-white/20' 
+              : 'bg-white/20 border-white/30'
+          }`}>
+            <TabsTrigger 
+              value="analytics"
+              className={`transition-all duration-300 hover:scale-105 ${
+                isDarkMode 
+                  ? 'data-[state=active]:bg-white/20 data-[state=active]:text-white hover:bg-white/10' 
+                  : 'data-[state=active]:bg-blue-500 data-[state=active]:text-white hover:bg-gray-100'
+              }`}
+            >
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger 
+              value="doctors"
+              className={`transition-all duration-300 hover:scale-105 ${
+                isDarkMode 
+                  ? 'data-[state=active]:bg-white/20 data-[state=active]:text-white hover:bg-white/10' 
+                  : 'data-[state=active]:bg-blue-500 data-[state=active]:text-white hover:bg-gray-100'
+              }`}
+            >
+              <Stethoscope className="h-4 w-4 mr-2" />
+              Doctors
+            </TabsTrigger>
+            <TabsTrigger 
+              value="patients"
+              className={`transition-all duration-300 hover:scale-105 ${
+                isDarkMode 
+                  ? 'data-[state=active]:bg-white/20 data-[state=active]:text-white hover:bg-white/10' 
+                  : 'data-[state=active]:bg-blue-500 data-[state=active]:text-white hover:bg-gray-100'
+              }`}
+            >
+              <Users className="h-4 w-4 mr-2" />
+              Patients
+            </TabsTrigger>
+            <TabsTrigger 
+              value="suppliers"
+              className={`transition-all duration-300 hover:scale-105 ${
+                isDarkMode 
+                  ? 'data-[state=active]:bg-white/20 data-[state=active]:text-white hover:bg-white/10' 
+                  : 'data-[state=active]:bg-blue-500 data-[state=active]:text-white hover:bg-gray-100'
+              }`}
+            >
+              <Weight className="h-4 w-4 mr-2" />
+              Suppliers
+            </TabsTrigger>
           </TabsList>
 
 
@@ -435,7 +624,11 @@ export const AdminDashboard = () => {
               </div>
             </div>
 
-            <Card className="border-0 shadow-sm">
+            <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
+              isDarkMode 
+                ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
+                : 'bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40 shadow-lg'
+            }`}>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -484,7 +677,7 @@ export const AdminDashboard = () => {
                   ))}
                 </TableBody>
               </Table>
-            </Card>
+            </div>
           </TabsContent>
 
           {/* Patients Tab */}
@@ -505,7 +698,11 @@ export const AdminDashboard = () => {
               </div>
             </div>
 
-            <Card className="border-0 shadow-sm">
+            <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
+              isDarkMode 
+                ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
+                : 'bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40 shadow-lg'
+            }`}>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -561,7 +758,7 @@ export const AdminDashboard = () => {
                   ))}
                 </TableBody>
               </Table>
-            </Card>
+            </div>
           </TabsContent>
 
           {/* Suppliers Tab */}
@@ -589,7 +786,11 @@ export const AdminDashboard = () => {
               </div>
             </div>
 
-            <Card className="border-0 shadow-sm">
+            <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
+              isDarkMode 
+                ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
+                : 'bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40 shadow-lg'
+            }`}>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -648,7 +849,7 @@ export const AdminDashboard = () => {
                   ))}
                 </TableBody>
               </Table>
-            </Card>
+            </div>
           </TabsContent>
 
          
@@ -656,11 +857,19 @@ export const AdminDashboard = () => {
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
             <div className="grid lg:grid-cols-2 gap-6">
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle>User Growth Analytics</CardTitle>
-                </CardHeader>
-                <CardContent>
+              <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
+                isDarkMode 
+                  ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
+                  : 'bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40 shadow-lg'
+              }`}>
+                <div className="mb-6">
+                  <h3 className={`text-lg font-semibold ${
+                    isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    User Growth Analytics
+                  </h3>
+                </div>
+                <div>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600 dark:text-gray-400">Total Users</span>
@@ -680,14 +889,22 @@ export const AdminDashboard = () => {
                     </div>
                     <Progress value={90} className="h-2" />
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle>Revenue Analytics</CardTitle>
-                </CardHeader>
-                <CardContent>
+              <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
+                isDarkMode 
+                  ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
+                  : 'bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40 shadow-lg'
+              }`}>
+                <div className="mb-6">
+                  <h3 className={`text-lg font-semibold ${
+                    isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    Revenue Analytics
+                  </h3>
+                </div>
+                <div>
                   <div className="space-y-4">
                     <div className="text-center">
                       <div className="text-3xl font-bold text-green-600">
@@ -714,14 +931,22 @@ export const AdminDashboard = () => {
                       </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle>Appointment Analytics</CardTitle>
-                </CardHeader>
-                <CardContent>
+              <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
+                isDarkMode 
+                  ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
+                  : 'bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40 shadow-lg'
+              }`}>
+                <div className="mb-6">
+                  <h3 className={`text-lg font-semibold ${
+                    isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    Appointment Analytics
+                  </h3>
+                </div>
+                <div>
                   <div className="space-y-4">
                     <div className="text-center">
                       <div className="text-3xl font-bold text-blue-600">
@@ -745,14 +970,22 @@ export const AdminDashboard = () => {
                       </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle>System Performance</CardTitle>
-                </CardHeader>
-                <CardContent>
+              <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
+                isDarkMode 
+                  ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
+                  : 'bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40 shadow-lg'
+              }`}>
+                <div className="mb-6">
+                  <h3 className={`text-lg font-semibold ${
+                    isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    System Performance
+                  </h3>
+                </div>
+                <div>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600 dark:text-gray-400">System Uptime</span>
@@ -772,8 +1005,8 @@ export const AdminDashboard = () => {
                       </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           </TabsContent>
         </Tabs>

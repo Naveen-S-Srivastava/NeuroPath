@@ -72,7 +72,7 @@ export const AppRouter = () => {
   // Inner component to use useLocation hook
   const AppContent = () => {
     const location = useLocation();
-    const hideNavbarRoutes = ['/login', '/signup','/supplier-login'];
+    const hideNavbarRoutes = ['/login', '/signup','/supplier-login', '/patient-dashboard', '/neurologist-dashboard', '/admin-dashboard'];
     const shouldShowNavbar = !hideNavbarRoutes.includes(location.pathname);
 
     return (

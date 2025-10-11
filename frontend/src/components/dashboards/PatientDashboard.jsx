@@ -40,7 +40,8 @@ import {
   Brain,
   ArrowLeft,
   Settings,
-  LogOut
+  LogOut,
+  User
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ReportPreviewModal } from '../ui/ReportPreviewModal';
@@ -70,6 +71,18 @@ export const PatientDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [expandedOrders, setExpandedOrders] = useState(new Set());
   const orderFileRef = React.useRef(null);
+
+  // Address form state
+  const [addressForm, setAddressForm] = useState({
+    street: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: '',
+    landmark: ''
+  });
+  const [useCurrentLocation, setUseCurrentLocation] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
 
   // Preview modal state
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -523,13 +536,73 @@ export const PatientDashboard = () => {
     orderFileRef.current?.click();
   };
 
+  // Address form handlers
+  const handleAddressChange = (field, value) => {
+    setAddressForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by this browser');
+      return;
+    }
+
+    setLocationLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          
+          // For demo purposes, we'll use a simple approach
+          // In production, you'd use a proper geocoding service
+          setAddressForm({
+            street: `Lat: ${latitude.toFixed(6)}, Lng: ${longitude.toFixed(6)}`,
+            city: 'Current Location',
+            state: '',
+            postalCode: '',
+            country: '',
+            landmark: 'Detected via GPS'
+          });
+          
+          setUseCurrentLocation(true);
+          toast.success('Location detected! Please verify and complete the address.');
+        } catch (error) {
+          console.error('Geocoding error:', error);
+          toast.error('Could not get address from location. Please enter manually.');
+        } finally {
+          setLocationLoading(false);
+        }
+      },
+      (error) => {
+        console.error('Geolocation error:', error);
+        toast.error('Could not access your location. Please enter address manually.');
+        setLocationLoading(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000
+      }
+    );
+  };
+
+  const formatAddress = () => {
+    const { street, city, state, postalCode, country, landmark } = addressForm;
+    const parts = [street, city, state, postalCode, country].filter(Boolean);
+    return parts.join(', ');
+  };
+
   const handleOrderFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     
     // Validate delivery address is required
-    if (!deliveryAddress || deliveryAddress.trim().length === 0) {
-      toast.error('Delivery address is required');
+    const fullAddress = formatAddress();
+    if (!fullAddress || fullAddress.trim().length === 0) {
+      toast.error('Please provide a complete delivery address');
       return;
     }
     
@@ -538,7 +611,7 @@ export const PatientDashboard = () => {
       const token = localStorage.getItem('neuropath_token');
       const form = new FormData();
       form.append('file', file);
-      form.append('deliveryAddress', deliveryAddress.trim());
+      form.append('deliveryAddress', fullAddress.trim());
       const uploadRes = await fetch(`${API_BASE}/api/medicine-orders/upload`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
@@ -655,86 +728,95 @@ export const PatientDashboard = () => {
         <div className="mb-8 animate-slide-in-blur">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => window.history.back()}
-                className={`px-4 py-2 rounded-xl border-2 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 backdrop-blur-md ${
+              <div 
+                className={`flex items-center space-x-2 cursor-pointer transition-all duration-300 hover:scale-105 px-4 py-2 rounded-xl border-2 shadow-lg hover:shadow-xl backdrop-blur-md ${
                   isDarkMode 
                     ? 'text-white border-white/30 bg-white/10 hover:bg-white/20 hover:border-white/50' 
                     : 'text-gray-800 border-white/30 bg-white/20 hover:bg-white/30 hover:border-white/40'
                 }`}
+                onClick={() => window.location.href = '/'}
               >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-              </Button>
-              <div>
+                <div className={`p-1.5 rounded-lg transition-all duration-300 ${
+                  isDarkMode 
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg' 
+                    : 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-md'
+                }`}>
+                  <Brain className="h-4 w-4 text-white" />
+                </div>
+                <span className={`text-lg font-bold transition-all duration-300 ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
+                  NeuroPath
+                </span>
+              </div>
+            <div>
                 <h1 className={`text-3xl font-bold bg-gradient-to-r ${
                   isDarkMode 
                     ? 'from-white to-gray-300' 
                     : 'from-gray-900 to-gray-700'
                 } bg-clip-text text-transparent`}>
-                  Welcome back, {user?.name}!
-                </h1>
+                Welcome back, {user?.name}!
+              </h1>
                 <p className={`text-sm ${
                   isDarkMode ? 'text-gray-300' : 'text-gray-600'
                 }`}>
-                  Manage your health and stay connected with your neurologists
-                </p>
-              </div>
+                Manage your health and stay connected with your neurologists
+              </p>
             </div>
-            <div className="flex items-center space-x-3">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={toggleTheme}
-                className={`px-4 py-2 rounded-xl border backdrop-blur-md transition-all duration-300 hover:scale-105 ${
-                  isDarkMode 
-                    ? 'border-white/20 bg-white/10 hover:bg-white/20 text-white' 
-                    : 'border-white/30 bg-white/20 hover:bg-white/30 text-gray-700'
-                }`}
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                Theme
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className={`px-4 py-2 rounded-xl border backdrop-blur-md transition-all duration-300 hover:scale-105 ${
-                  isDarkMode 
-                    ? 'border-white/20 bg-white/10 hover:bg-white/20 text-white' 
-                    : 'border-white/30 bg-white/20 hover:bg-white/30 text-gray-700'
-                }`}
-              >
-                <Bell className="h-4 w-4 mr-2" />
-                Notifications
-              </Button>
-              <div className="relative group">
-                <Avatar className="h-10 w-10 border-2 border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                  <AvatarImage src={user?.avatar} alt={user?.name} />
-                  <AvatarFallback className={`${
-                    isDarkMode ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-700'
-                  }`}>
-                    {user?.name?.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className={`absolute top-12 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
-                  isDarkMode 
-                    ? 'bg-gray-800 border-white/20' 
-                    : 'bg-white border-gray-200'
-                } border rounded-lg shadow-lg p-2 min-w-[120px]`}>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={logout}
-                    className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Logout
-                  </Button>
-                </div>
-              </div>
             </div>
+             <div className="flex items-center space-x-3">
+               <Button 
+                 variant="ghost" 
+                 size="sm"
+                 onClick={toggleTheme}
+                 className={`px-4 py-2 rounded-xl border backdrop-blur-md transition-all duration-300 hover:scale-105 ${
+                   isDarkMode 
+                     ? 'border-white/20 bg-white/10 hover:bg-white/20 text-white' 
+                     : 'border-gray-300 bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700 shadow-sm hover:shadow-md'
+                 }`}
+               >
+                 <Settings className="h-4 w-4 mr-2" />
+                 Theme
+               </Button>
+               <Button 
+                 variant="ghost" 
+                 size="sm"
+                 className={`px-4 py-2 rounded-xl border backdrop-blur-md transition-all duration-300 hover:scale-105 ${
+                   isDarkMode 
+                     ? 'border-white/20 bg-white/10 hover:bg-white/20 text-white' 
+                     : 'border-gray-300 bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700 shadow-sm hover:shadow-md'
+                 }`}
+               >
+                 <Bell className="h-4 w-4 mr-2" />
+                 Notifications
+               </Button>
+               <Button 
+                 variant="ghost" 
+                 size="sm"
+                 onClick={() => {/* Navigate to profile page */}}
+                 className={`px-4 py-2 rounded-xl border backdrop-blur-md transition-all duration-300 hover:scale-105 ${
+                   isDarkMode 
+                     ? 'border-white/20 bg-white/10 hover:bg-white/20 text-white' 
+                     : 'border-gray-300 bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700 shadow-sm hover:shadow-md'
+                 }`}
+               >
+                 <User className="h-4 w-4 mr-2" />
+                 Profile
+               </Button>
+               <Button 
+                 variant="ghost" 
+                 size="sm"
+                 onClick={logout}
+                 className={`px-4 py-2 rounded-xl border backdrop-blur-md transition-all duration-300 hover:scale-105 ${
+                   isDarkMode 
+                     ? 'border-red-400/30 bg-red-400/10 hover:bg-red-400/20 text-red-400 hover:text-red-300' 
+                     : 'border-red-300 bg-red-50 hover:bg-red-100 hover:border-red-400 text-red-600 hover:text-red-700 shadow-sm hover:shadow-md'
+                 }`}
+               >
+                 <LogOut className="h-4 w-4 mr-2" />
+                 Logout
+               </Button>
+             </div>
           </div>
         </div>
 
@@ -839,7 +921,7 @@ export const PatientDashboard = () => {
                   style={{ animationDelay: `${index * 0.1}s` }}
                   onClick={action.action}
                 >
-                  <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
+                  <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl relative z-10 ${
                     isDarkMode 
                       ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
                       : 'bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40 shadow-lg'
@@ -913,7 +995,7 @@ export const PatientDashboard = () => {
                                 doc.available ? 'bg-green-500' : 'bg-red-500'
                               }`}></span>
                               {doc.available ? 'Online' : 'Offline'}
-                            </div>
+                          </div>
                           </div>
                           <p className={`text-sm ${
                             isDarkMode ? 'text-gray-300' : 'text-gray-600'
@@ -934,8 +1016,8 @@ export const PatientDashboard = () => {
                                 : 'from-gray-400 to-gray-500 cursor-not-allowed'
                             } text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105`}
                             onClick={() => {
-                              setSelectedNeurologist(doc);
-                              setBookingOpen(true);
+                            setSelectedNeurologist(doc);
+                            setBookingOpen(true);
                             }} 
                             disabled={!doc.available}
                           >
@@ -979,8 +1061,8 @@ export const PatientDashboard = () => {
                     }`}
                   >
                     <Eye className="h-4 w-4 mr-2" />
-                    View All
-                  </Button>
+                      View All
+                    </Button>
                 </div>
                 <div className="space-y-4">
                   {recentReports.slice(0, 3).map((report, index) => (
@@ -1042,19 +1124,19 @@ export const PatientDashboard = () => {
                             variant="ghost" 
                             size="sm" 
                             onClick={async () => {
-                              try {
+                            try {
                                 const token = localStorage.getItem('neuropath_token');
-                                const res = await fetch(`http://localhost:5000/api/reports/${report._id || report.id}`, {
-                                  method: 'DELETE',
-                                  headers: { 'Authorization': `Bearer ${token}` },
-                                });
-                                if (!res.ok) throw new Error('Failed to delete');
-                                toast.success('Report deleted');
-                                await fetchDashboardData();
-                              } catch (err) {
-                                console.error('Delete error:', err);
-                                toast.error('Delete failed');
-                              }
+                              const res = await fetch(`http://localhost:5000/api/reports/${report._id || report.id}`, {
+                                method: 'DELETE',
+                                headers: { 'Authorization': `Bearer ${token}` },
+                              });
+                              if (!res.ok) throw new Error('Failed to delete');
+                              toast.success('Report deleted');
+                              await fetchDashboardData();
+                            } catch (err) {
+                              console.error('Delete error:', err);
+                              toast.error('Delete failed');
+                            }
                             }}
                             className={`transition-all duration-300 hover:scale-105 text-red-600 hover:text-red-700 ${
                               isDarkMode 
@@ -1096,8 +1178,8 @@ export const PatientDashboard = () => {
                     }`}
                   >
                     <Eye className="h-4 w-4 mr-2" />
-                    View All
-                  </Button>
+                      View All
+                    </Button>
                 </div>
                 <div className="space-y-4">
                   {recentPrescriptions.slice(0, 3).map((prescription, index) => (
@@ -1375,28 +1457,196 @@ export const PatientDashboard = () => {
 
 
             {/* Prescription upload & tracking */}
-            <Card className="border-0 shadow-sm">
-              <CardContent className="p-6">
+            <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
+              isDarkMode 
+                ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
+                : 'bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40 shadow-lg'
+            }`}>
+              <div className="mb-6">
+                <h3 className={`text-xl font-semibold mb-2 ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Upload Prescription for Medicines
+                </h3>
+                <p className={`text-sm ${
+                  isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                }`}>
+                  Your doctor will review and forward it to a supplier. Please provide your complete delivery address.
+                </p>
+              </div>
+
+              {/* Address Form */}
+              <div className="mb-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Upload Prescription for Medicines</h3>
-                  <div className="flex items-center space-x-3">
-                    <input
-                      value={deliveryAddress}
-                      onChange={(e) => setDeliveryAddress(e.target.value)}
-                      placeholder="Delivery address (required)*"
-                      className="px-3 py-2 rounded border bg-white dark:bg-gray-700 text-sm w-72"
+                  <h4 className={`text-lg font-medium ${
+                    isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    Delivery Address
+                  </h4>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={getCurrentLocation}
+                    disabled={locationLoading}
+                    className={`transition-all duration-300 hover:scale-105 ${
+                      isDarkMode 
+                        ? 'border-white/30 bg-white/10 hover:bg-white/20 text-white' 
+                        : 'border-white/30 bg-white/20 hover:bg-white/30 text-gray-700'
+                    }`}
+                  >
+                    {locationLoading ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                    ) : (
+                      <MapPin className="h-4 w-4 mr-2" />
+                    )}
+                    {locationLoading ? 'Detecting...' : 'Use Current Location'}
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      Street Address *
+                    </label>
+                    <Input
+                      value={addressForm.street}
+                      onChange={(e) => handleAddressChange('street', e.target.value)}
+                      placeholder="House number, street name"
+                      className={`transition-all duration-300 ${
+                        isDarkMode 
+                          ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40 text-white placeholder-gray-400' 
+                          : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500 text-gray-900 placeholder-gray-500'
+                      }`}
                       required
                     />
+                  </div>
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      City *
+                    </label>
+                    <Input
+                      value={addressForm.city}
+                      onChange={(e) => handleAddressChange('city', e.target.value)}
+                      placeholder="City name"
+                      className={`transition-all duration-300 ${
+                        isDarkMode 
+                          ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40 text-white placeholder-gray-400' 
+                          : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500 text-gray-900 placeholder-gray-500'
+                      }`}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      State/Province *
+                    </label>
+                    <Input
+                      value={addressForm.state}
+                      onChange={(e) => handleAddressChange('state', e.target.value)}
+                      placeholder="State or Province"
+                      className={`transition-all duration-300 ${
+                        isDarkMode 
+                          ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40 text-white placeholder-gray-400' 
+                          : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500 text-gray-900 placeholder-gray-500'
+                      }`}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      Postal Code *
+                    </label>
+                    <Input
+                      value={addressForm.postalCode}
+                      onChange={(e) => handleAddressChange('postalCode', e.target.value)}
+                      placeholder="ZIP/Postal Code"
+                      className={`transition-all duration-300 ${
+                        isDarkMode 
+                          ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40 text-white placeholder-gray-400' 
+                          : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500 text-gray-900 placeholder-gray-500'
+                      }`}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      Country *
+                    </label>
+                    <Input
+                      value={addressForm.country}
+                      onChange={(e) => handleAddressChange('country', e.target.value)}
+                      placeholder="Country"
+                      className={`transition-all duration-300 ${
+                        isDarkMode 
+                          ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40 text-white placeholder-gray-400' 
+                          : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500 text-gray-900 placeholder-gray-500'
+                      }`}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      Landmark (Optional)
+                    </label>
+                    <Input
+                      value={addressForm.landmark}
+                      onChange={(e) => handleAddressChange('landmark', e.target.value)}
+                      placeholder="Nearby landmark for reference"
+                      className={`transition-all duration-300 ${
+                        isDarkMode 
+                          ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40 text-white placeholder-gray-400' 
+                          : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500 text-gray-900 placeholder-gray-500'
+                      }`}
+                    />
+                  </div>
+                </div>
+
+                {/* Address Preview */}
+                {formatAddress() && (
+                  <div className={`p-3 rounded-lg border ${
+                    isDarkMode 
+                      ? 'bg-white/5 border-white/10' 
+                      : 'bg-white/10 border-white/20'
+                  }`}>
+                    <p className={`text-sm font-medium mb-1 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      Address Preview:
+                    </p>
+                    <p className={`text-sm ${
+                      isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                    }`}>
+                      {formatAddress()}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Upload Section */}
+              <div className="flex items-center space-x-3">
                     <input ref={orderFileRef} type="file" accept="application/pdf,image/*" className="hidden" onChange={handleOrderFileChange} />
-                    <Button onClick={handleUploadPrescriptionOrder} className="bg-blue-600 hover:bg-blue-700" disabled={orderUploading || !deliveryAddress?.trim()}>
+                <Button 
+                  onClick={handleUploadPrescriptionOrder} 
+                  className={`bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105`}
+                  disabled={orderUploading || !formatAddress()?.trim()}
+                >
                       <Upload className="h-4 w-4 mr-2" />
                       {orderUploading ? 'Uploading...' : 'Upload Prescription'}
                     </Button>
                   </div>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Your doctor will review and forward it to a supplier. Please provide your delivery address. Track progress below.</p>
-              </CardContent>
-            </Card>
 
             <div className="grid lg:grid-cols-1 gap-6">
               <Card className="border-0 shadow-sm">
