@@ -92,6 +92,50 @@ module.exports = (io) => {
     }
   });
 
+  // Supplier: forgot password - send password via email
+  router.post('/forgot-password', async (req, res) => {
+    try {
+      const { supplierId } = req.body;
+      if (!supplierId) return res.status(400).json({ message: 'Supplier ID is required' });
+
+      const supplier = await Supplier.findOne({ supplierId, active: true });
+      if (!supplier) return res.status(404).json({ message: 'Supplier not found' });
+
+      // Send email with password recovery instructions
+      try {
+        const mailOptions = {
+          from: process.env.EMAIL_USER || 'neuropath@gmail.com',
+          to: supplier.email,
+          subject: 'NeuroPath Supplier Password Recovery',
+          html: `
+            <h2>Password Recovery Request</h2>
+            <p>We received a password recovery request for your supplier account.</p>
+            <h3>Account Details:</h3>
+            <ul>
+              <li><strong>Supplier ID:</strong> ${supplier.supplierId}</li>
+              <li><strong>Name:</strong> ${supplier.name}</li>
+              <li><strong>Email:</strong> ${supplier.email}</li>
+              ${supplier.company ? `<li><strong>Company:</strong> ${supplier.company}</li>` : ''}
+            </ul>
+            <p><strong>Security Notice:</strong> For security reasons, we cannot send your password via email. Please contact the NeuroPath administration team to reset your password.</p>
+            <p><strong>Contact:</strong> admin@neuropath.com or call our support line.</p>
+            <p>Best regards,<br>NeuroPath Support Team</p>
+          `
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log('Supplier password recovery email sent to:', supplier.email);
+        return res.json({ message: 'Recovery instructions sent to your registered email' });
+      } catch (emailError) {
+        console.error('Failed to send supplier password email:', emailError);
+        return res.status(500).json({ message: 'Failed to send email' });
+      }
+    } catch (err) {
+      console.error('Forgot password error:', err);
+      return res.status(500).json({ message: 'Failed to process request' });
+    }
+  });
+
   // Supplier: me
   router.get('/me', authenticateToken, authorizeSupplier, async (req, res) => {
     try {
@@ -142,13 +186,9 @@ module.exports = (io) => {
   router.patch('/orders/:id/status', authenticateToken, authorizeSupplier, async (req, res) => {
     try {
       const { id } = req.params;
-      const { status, note } = req.body;
+      const { status, note, isMainStatus } = req.body;
       
-      console.log('Update status request:', { id, status, note, userId: req.user.id });
-      
-      // Allow any status for custom updates
-      // const allowed = ['processing', 'shipped', 'delivered'];
-      // const isCustomStatus = !allowed.includes(status);
+      console.log('Update status request:', { id, status, note, isMainStatus, userId: req.user.id });
       
       if (!status || typeof status !== 'string' || status.trim().length === 0) {
         return res.status(400).json({ message: 'Status is required' });
@@ -174,7 +214,26 @@ module.exports = (io) => {
       }
       console.log('Authorization passed');
 
-      order.status = status;
+      // Only update order.status for main status changes (from buttons)
+      if (isMainStatus) {
+        // Define allowed main status transitions
+        const mainStatuses = ['processing', 'shipped', 'delivered'];
+        if (!mainStatuses.includes(status)) {
+          return res.status(400).json({ message: `Invalid main status: ${status}` });
+        }
+        
+        // Prevent going backwards in status (e.g., from delivered to shipped)
+        const statusOrder = { 'processing': 1, 'shipped': 2, 'delivered': 3 };
+        const currentOrder = statusOrder[order.status] || 0;
+        const newOrder = statusOrder[status] || 0;
+        
+        if (newOrder < currentOrder) {
+          return res.status(400).json({ message: `Cannot change status from ${order.status} to ${status}` });
+        }
+        
+        order.status = status;
+      }
+      // For custom statuses/notes, don't change the main order status
       
       // Ensure timeline is an array
       if (!Array.isArray(order.timeline)) {
@@ -182,8 +241,8 @@ module.exports = (io) => {
       }
       
       const timelineEntry = { 
-        status, 
-        note: note || 'Status updated', 
+        status: isMainStatus ? status : `note: ${status}`, // Prefix custom statuses with 'note:'
+        note: note || (isMainStatus ? 'Status updated' : 'Note added'), 
         at: new Date() 
       };
       console.log('Adding timeline entry:', timelineEntry);
@@ -202,7 +261,7 @@ module.exports = (io) => {
       
       io.to(`user_${order.patientId}`).emit('order:updated', { order: order.toObject() });
       return res.json({ 
-        message: 'Order status updated', 
+        message: isMainStatus ? 'Order status updated' : 'Note added to order',
         order: {
           _id: order._id,
           status: order.status,

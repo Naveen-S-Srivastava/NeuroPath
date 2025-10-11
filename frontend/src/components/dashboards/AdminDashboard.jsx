@@ -43,7 +43,8 @@ import {
   Stethoscope,
   Shield,
   Bell,
-  Settings
+  Settings,
+  Weight
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -128,7 +129,8 @@ export const AdminDashboard = () => {
     totalRevenue: Number(systemStats.totalRevenue || 0),
     totalAppointments: Number(systemStats.totalAppointments || 0),
     systemUptime: Number(systemStats.systemUptime || 0),
-    averageRating: Number(systemStats.averageRating || 0)
+    averageRating: Number(systemStats.averageRating || 0),
+    totalSuppliers: Number(dashboardData.suppliers.length || 0)
   };
 
   // TODO: Replace with API calls
@@ -183,10 +185,10 @@ export const AdminDashboard = () => {
       color: 'text-purple-600'
     },
     {
-      title: 'Total Admins',
-      value: String(safeStats.totalAdmins),
+      title: 'Total Suppliers',
+      value: String(safeStats.totalSuppliers),
       change: '+2%',
-      icon: Shield,
+      icon: Weight,
       color: 'text-orange-600'
     }
   ];
