@@ -1,6 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
+const nodemailer = require('nodemailer');
 const MedicineOrder = require('../models/MedicineOrder');
 const Supplier = require('../models/Supplier');
 const { authenticateToken, authorizeRoles, authorizeSupplier } = require('../middleware/auth');
@@ -15,6 +16,15 @@ cloudinary.config({
 
 module.exports = (io) => {
   const router = express.Router();
+
+  // Email transporter
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER || 'neuropath@gmail.com',
+      pass: process.env.EMAIL_PASS // App password for Gmail
+    }
+  });
 
   // Patient: upload prescription image/pdf for order
   router.post('/upload', authenticateToken, authorizeRoles('patient'), upload.single('file'), async (req, res) => {
@@ -123,6 +133,34 @@ module.exports = (io) => {
         order.timeline.push({ status: 'rejected', note: note || 'Rejected by neurologist' });
         order.updatedAt = new Date();
         await order.save();
+        
+        // Send rejection email to patient
+        try {
+          const mailOptions = {
+            from: process.env.EMAIL_USER || 'neuropath@gmail.com',
+            to: order.patientId.email,
+            subject: 'NeuroPath - Prescription Order Update',
+            html: `
+              <h2>Prescription Order Update</h2>
+              <p>Dear ${order.patientId.name},</p>
+              <p>We regret to inform you that your prescription order has been <strong>rejected</strong> by our neurologist.</p>
+              <h3>Order Details:</h3>
+              <ul>
+                <li><strong>Order ID:</strong> ${order._id}</li>
+                <li><strong>Status:</strong> Rejected</li>
+                <li><strong>Reason:</strong> ${note || 'Rejected by neurologist'}</li>
+                <li><strong>Updated:</strong> ${new Date().toLocaleString()}</li>
+              </ul>
+              <p>Please contact our support team if you have any questions or need to submit a new prescription.</p>
+              <p>Best regards,<br>NeuroPath Medical Team</p>
+            `
+          };
+          await transporter.sendMail(mailOptions);
+          console.log('Rejection email sent to patient:', order.patientId.email);
+        } catch (emailError) {
+          console.error('Failed to send rejection email:', emailError);
+        }
+        
         io.to(`user_${order.patientId}`).emit('order:updated', { order });
         return res.json({ message: 'Order rejected', order });
       }
@@ -141,6 +179,36 @@ module.exports = (io) => {
 
       order.updatedAt = new Date();
       await order.save();
+
+      // Send approval email to patient
+      try {
+        const statusMessage = supplierId ? 'approved and forwarded to supplier' : 'approved';
+        const supplierInfo = supplierId ? `<li><strong>Assigned Supplier:</strong> ${supplier.name}</li>` : '';
+        
+        const mailOptions = {
+          from: process.env.EMAIL_USER || 'neuropath@gmail.com',
+          to: order.patientId.email,
+          subject: 'NeuroPath - Prescription Order Update',
+          html: `
+            <h2>Prescription Order Update</h2>
+            <p>Dear ${order.patientId.name},</p>
+            <p>Great news! Your prescription order has been <strong>${statusMessage}</strong>.</p>
+            <h3>Order Details:</h3>
+            <ul>
+              <li><strong>Order ID:</strong> ${order._id}</li>
+              <li><strong>Status:</strong> ${order.status.replace(/_/g, ' ')}</li>
+              ${supplierInfo}
+              <li><strong>Updated:</strong> ${new Date().toLocaleString()}</li>
+            </ul>
+            ${supplierId ? '<p>Your order is now being processed by our trusted supplier. You will receive updates as the order progresses.</p>' : '<p>A neurologist will review your order and assign it to an appropriate supplier soon.</p>'}
+            <p>Best regards,<br>NeuroPath Medical Team</p>
+          `
+        };
+        await transporter.sendMail(mailOptions);
+        console.log('Approval email sent to patient:', order.patientId.email);
+      } catch (emailError) {
+        console.error('Failed to send approval email:', emailError);
+      }
 
       io.to(`user_${order.patientId}`).emit('order:updated', { order });
       return res.json({ message: 'Order updated', order });
