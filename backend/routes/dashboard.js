@@ -160,8 +160,8 @@ router.get('/admin', authenticateToken, authorizeRoles('admin'), async (req, res
       const totalAppointments = patientAppointments.length;
       const lastVisit = patientAppointments.length > 0
         ? patientAppointments
-            .filter(a => a.status === 'completed')
-            .sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time))[0]
+          .filter(a => a.status === 'completed')
+          .sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time))[0]
         : null;
 
       // Calculate age (assuming we don't have DOB, using account creation as proxy)
@@ -177,9 +177,36 @@ router.get('/admin', authenticateToken, authorizeRoles('admin'), async (req, res
       };
     }));
 
+    // Get detailed neurologist information
+    const neurologists = allUsers.filter(u => u.role === 'neurologist');
+    const neurologistDetails = await Promise.all(neurologists.map(async (neurologist) => {
+      // Get appointments for this neurologist
+      const neurologistAppointments = await Appointment.find({ neurologistId: neurologist._id });
+
+      // Calculate neurologist stats
+      const totalAppointments = neurologistAppointments.length;
+      const confirmedAppointments = neurologistAppointments.filter(a => a.status === 'confirmed').length;
+      const completedAppointments = neurologistAppointments.filter(a => a.status === 'completed').length;
+
+      // Calculate experience (using account creation as proxy)
+      const experience = Math.floor((new Date() - new Date(neurologist.createdAt)) / (365.25 * 24 * 60 * 60 * 1000));
+
+      return {
+        ...neurologist.toObject(),
+        password: undefined, // Remove password
+        experience: experience || 'N/A',
+        joinDate: neurologist.createdAt ? new Date(neurologist.createdAt).toLocaleDateString() : 'N/A',
+        totalAppointments,
+        confirmedAppointments,
+        completedAppointments
+      };
+    }));
+
+    
     res.json({
       users: usersWithoutPasswords,
       patients: patientDetails,
+      neurologists: neurologistDetails,
       suppliers: suppliers,
       stats: {
         totalUsers: allUsers.length,

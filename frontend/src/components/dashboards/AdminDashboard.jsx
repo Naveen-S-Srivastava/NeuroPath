@@ -57,7 +57,8 @@ export const AdminDashboard = () => {
     users: [],
     patients: [],
     stats: {},
-    suppliers: []
+    suppliers: [],
+    neurologists: []
   });
   const [loading, setLoading] = useState(true);
   const [showCreateSupplierModal, setShowCreateSupplierModal] = useState(false);
@@ -112,13 +113,11 @@ export const AdminDashboard = () => {
   useEffect(() => {
     fetchDashboardData();
   }, []);
-
   // Use API data instead of mock data
   const systemStats = dashboardData.stats || {};
-  const users = dashboardData.users || [];
   const patients = dashboardData.patients || [];
   const suppliers = dashboardData.suppliers || [];
-
+  const neurologists = dashboardData.neurologists || [];
   // normalize stats with safe defaults
   const safeStats = {
     totalUsers: Number(systemStats.totalUsers || 0),
@@ -133,7 +132,7 @@ export const AdminDashboard = () => {
   };
 
   // TODO: Replace with API calls
-  const doctors = users.filter(u => u.role === 'neurologist') || [];
+  const doctors = neurologists;
   const systemAlerts = [
     {
       id: 1,
@@ -191,11 +190,6 @@ export const AdminDashboard = () => {
       color: 'text-orange-600'
     }
   ];
-
-  const handleUserAction = (userId, action, userType) => {
-    toast.success(`${userType} ${action} successfully!`);
-  };
-
 
   const handleCreateSupplier = async () => {
     if (!newSupplier.supplierId || !newSupplier.password) {
@@ -436,10 +430,6 @@ export const AdminDashboard = () => {
                   <Filter className="h-4 w-4 mr-2" />
                   Filter
                 </Button>
-                <Button className="bg-blue-600 hover:bg-blue-700">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Doctor
-                </Button>
               </div>
             </div>
 
@@ -447,13 +437,13 @@ export const AdminDashboard = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Doctor</TableHead>
-                    <TableHead>Specialty</TableHead>
+                    <TableHead>Neurologist</TableHead>
                     <TableHead>Experience</TableHead>
-                    <TableHead>Rating</TableHead>
-                    <TableHead>Patients</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>Join Date</TableHead>
+                    <TableHead>Total Appointments</TableHead>
+                    <TableHead>Confirmed</TableHead>
+                    <TableHead>Completed</TableHead>
+                    {/* <TableHead>Actions</TableHead> */}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -463,7 +453,7 @@ export const AdminDashboard = () => {
                         <div className="flex items-center space-x-3">
                           <Avatar className="h-10 w-10">
                             <AvatarImage src={doctor.avatar} alt={doctor.name} />
-                            <AvatarFallback>{doctor.name.charAt(3)}</AvatarFallback>
+                            <AvatarFallback>{doctor.name.charAt(0)}</AvatarFallback>
                           </Avatar>
                           <div>
                             <div className="font-medium text-gray-900 dark:text-white">
@@ -473,34 +463,21 @@ export const AdminDashboard = () => {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{doctor.specialty}</TableCell>
-                      <TableCell>{doctor.experience}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-1">
-                          <span>{doctor.rating}</span>
-                          <span className="text-yellow-400">★</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{doctor.patients}</TableCell>
-                      <TableCell>
-                        <Badge variant={doctor.status === 'active' ? 'default' : 'destructive'}>
-                          {doctor.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
+                      <TableCell>{doctor.experience} years</TableCell>
+                      <TableCell>{doctor.joinDate}</TableCell>
+                      <TableCell>{doctor.totalAppointments}</TableCell>
+                      <TableCell>{doctor.confirmedAppointments}</TableCell>
+                      <TableCell>{doctor.completedAppointments}</TableCell>
+                      {/* <TableCell>
                         <div className="flex space-x-2">
                           <Button variant="outline" size="sm">
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button 
-                            variant={doctor.status === 'active' ? 'destructive' : 'default'} 
-                            size="sm"
-                            onClick={() => handleUserAction(doctor.id, doctor.status === 'active' ? 'suspended' : 'activated', 'doctor')}
-                          >
-                            {doctor.status === 'active' ? 'Suspend' : 'Activate'}
+                          <Button variant="outline" size="sm">
+                            View Details
                           </Button>
                         </div>
-                      </TableCell>
+                      </TableCell> */}
                     </TableRow>
                   ))}
                 </TableBody>
