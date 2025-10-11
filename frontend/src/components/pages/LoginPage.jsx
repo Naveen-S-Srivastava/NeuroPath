@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Checkbox } from '../ui/checkbox';
 import { useAuth } from '../context/AuthContext';
+import { useThemeToggle } from '../hooks/useTheme';
 import { ImageWithFallback } from '../ui/ImageWithFallback';
 import { 
   Brain, 
@@ -16,13 +17,18 @@ import {
   Loader2,
   UserCheck,
   Stethoscope,
-  Shield
+  Shield,
+  Sparkles,
+  Zap,
+  Heart,
+  Activity
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
   const { login, isLoading } = useAuth();
+  const { isDarkMode } = useThemeToggle();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -32,12 +38,55 @@ export const LoginPage = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const [particles, setParticles] = useState([]);
 
   const roles = [
-    { value: 'patient', label: 'Patient', icon: UserCheck, color: 'text-blue-600' },
-    { value: 'neurologist', label: 'Neurologist', icon: Stethoscope, color: 'text-teal-600' },
-    { value: 'admin', label: 'Administrator', icon: Shield, color: 'text-green-600' }
+    { 
+      value: 'patient', 
+      label: 'Patient', 
+      icon: UserCheck, 
+      gradient: 'from-blue-500 to-blue-600',
+      description: 'Access your health records and book appointments'
+    },
+    { 
+      value: 'neurologist', 
+      label: 'Neurologist', 
+      icon: Stethoscope, 
+      gradient: 'from-teal-500 to-teal-600',
+      description: 'Manage patients and consultations'
+    },
+    { 
+      value: 'admin', 
+      label: 'Administrator', 
+      icon: Shield, 
+      gradient: 'from-green-500 to-green-600',
+      description: 'System administration and oversight'
+    }
   ];
+
+  const benefits = [
+    { text: 'Access to top neurologists', icon: Brain, gradient: 'from-blue-500 to-blue-600' },
+    { text: 'Secure health record management', icon: Shield, gradient: 'from-green-500 to-green-600' },
+    { text: '24/7 medical support', icon: Heart, gradient: 'from-red-500 to-red-600' },
+    { text: 'Prescription management', icon: Activity, gradient: 'from-blue-600 to-blue-700' },
+    { text: 'Video consultations', icon: Zap, gradient: 'from-gray-600 to-gray-700' },
+    { text: 'Medicine ordering', icon: Sparkles, gradient: 'from-blue-500 to-blue-600' }
+  ];
+
+  useEffect(() => {
+    // Create floating particles
+    const createParticles = () => {
+      const newParticles = Array.from({ length: 8 }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        delay: Math.random() * 6,
+        duration: 6 + Math.random() * 4,
+      }));
+      setParticles(newParticles);
+    };
+    
+    createParticles();
+  }, []);
 
   const validateForm = () => {
     const newErrors = {};
@@ -90,239 +139,457 @@ export const LoginPage = () => {
     }
   };
 
+  const selectedRole = roles.find(role => role.value === formData.role);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-50 dark:from-gray-900 dark:to-gray-800 py-12 px-4">
-      <div className="max-w-6xl mx-auto">
-      
+    <div className={`min-h-screen relative overflow-hidden transition-all duration-1000 ${
+      isDarkMode 
+        ? 'bg-gradient-to-br from-gray-900 via-black to-gray-800' 
+        : 'bg-gradient-to-br from-blue-50 via-white to-teal-50'
+    }`}>
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Morphing Orbs */}
+        <div className={`absolute top-20 left-20 w-72 h-72 rounded-full animate-morph ${
+          isDarkMode ? 'bg-white/10' : 'bg-blue-500/20'
+        } blur-3xl`}></div>
+        <div className={`absolute bottom-20 right-20 w-96 h-96 rounded-full animate-morph ${
+          isDarkMode ? 'bg-gray-300/10' : 'bg-teal-500/20'
+        } blur-3xl`} style={{ animationDelay: '2s' }}></div>
+        <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full animate-morph ${
+          isDarkMode ? 'bg-gray-200/10' : 'bg-purple-500/20'
+        } blur-3xl`} style={{ animationDelay: '4s' }}></div>
 
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Side - Image and Info */}
-          <div className="space-y-8">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <div className="bg-blue-600 p-2 rounded-lg">
-                  <Link to="/">
-                    <Brain className="h-6 w-6 text-white" />
-                  </Link>
-                </div>
-                <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                  NeuroPath
-                </span>
-              </div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
-                Welcome Back
-              </h1>
-              <p className="text-xl text-gray-600 dark:text-gray-300">
-                Sign in to access your healthcare dashboard and continue your journey 
-                towards better neurological health.
-              </p>
-            </div>
+        {/* Floating Particles */}
+        {particles.map((particle) => (
+          <div
+            key={particle.id}
+            className={`absolute w-2 h-2 rounded-full particle animate-float-slow ${
+              isDarkMode ? 'bg-white/40' : 'bg-blue-500/40'
+            }`}
+            style={{
+              left: `${particle.left}%`,
+              top: `${20 + Math.random() * 60}%`,
+              animationDelay: `${particle.delay}s`,
+              animationDuration: `${particle.duration}s`,
+            }}
+          />
+        ))}
 
-            <ImageWithFallback
-              src="https://images.unsplash.com/photo-1758691463110-697a814b2033?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWRpY2FsJTIwdGVhbSUyMGNvbnN1bHRhdGlvbnxlbnwxfHx8fDE3NTg3OTA5MTF8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
-              alt="Medical consultation"
-              className="w-full h-80 object-cover rounded-2xl shadow-lg"
-            />
-{/* 
-            <div className="grid grid-cols-3 gap-4">
-              {roles.map((role) => (
-                <div key={role.value} className="text-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                  <role.icon className={`h-8 w-8 mx-auto mb-2 ${role.color}`} />
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">{role.label}</p>
-                </div>
-              ))}
-            </div> */}
-            {/* Test Credentials Info */}
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">Test Accounts</h3>
-                  <div className="text-xs text-blue-800 dark:text-blue-200 space-y-1">
-                    <p><strong>Admin:</strong> admin@neuropath.com / admin123</p>
-                    <p><strong>Neurologist:</strong> sarah@neuropath.com / admin123</p>
-                    <p><strong>Patient:</strong> john@neuropath.com / admin123</p>
+        {/* Glow Effects */}
+        <div className={`absolute top-1/4 left-1/4 w-32 h-32 rounded-full animate-glow-pulse ${
+          isDarkMode ? 'bg-white/20' : 'bg-blue-500/30'
+        } blur-2xl`}></div>
+        <div className={`absolute bottom-1/4 right-1/4 w-24 h-24 rounded-full animate-glow-pulse ${
+          isDarkMode ? 'bg-gray-300/20' : 'bg-teal-500/30'
+        } blur-2xl`} style={{ animationDelay: '1s' }}></div>
+      </div>
+
+      <div className="relative z-10 py-12 px-4">
+        <div className="max-w-7xl mx-auto">
+          {/* Back Button */}
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/')}
+            className={`mb-8 px-6 py-3 rounded-xl border-2 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 ${
+              isDarkMode 
+                ? 'text-white border-white/30 bg-white/10 hover:bg-white/20 hover:border-white/50' 
+                : 'text-gray-800 border-gray-300 bg-white hover:bg-gray-50 hover:border-gray-400'
+            }`}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Home
+          </Button>
+
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
+            {/* Left Side - Info and Benefits */}
+            <div className="space-y-8">
+              <div className="space-y-6">
+                <div className="flex items-center space-x-3">
+                  <div className={`p-3 rounded-2xl bg-gradient-to-r ${selectedRole?.gradient || 'from-blue-500 to-blue-600'} shadow-lg backdrop-blur-sm`}>
+                    <Brain className="h-8 w-8 text-white" />
                   </div>
-                  <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">
-                    Remember to select the correct role from the dropdown!
+                  <span className={`text-3xl font-bold ${
+                    isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    NeuroPath
+                  </span>
+                </div>
+                <h1 className={`text-4xl md:text-5xl font-bold leading-tight ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Welcome Back
+                </h1>
+                <p className={`text-lg md:text-xl leading-relaxed ${
+                  isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                }`}>
+                  Sign in to access your healthcare dashboard and continue your journey 
+                  towards better neurological health.
+                </p>
+              </div>
+
+              <div className={`relative overflow-hidden rounded-3xl shadow-2xl backdrop-blur-sm border ${
+                isDarkMode ? 'border-white/10 bg-white/5' : 'border-gray-200 bg-white/80'
+              }`}>
+                <ImageWithFallback
+                  src="https://images.unsplash.com/photo-1758691463110-697a814b2033?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWRpY2FsJTIwdGVhbSUyMGNvbnN1bHRhdGlvbnxlbnwxfHx8fDE3NTg3OTA5MTF8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                  alt="Medical consultation"
+                  className="w-full h-80 object-cover"
+                />
+                <div className={`absolute inset-0 bg-gradient-to-t ${
+                  isDarkMode ? 'from-black/50 to-transparent' : 'from-white/20 to-transparent'
+                }`}></div>
+              </div>
+              <div className="space-y-6">
+                <h3 className={`text-2xl font-semibold ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
+                  What you'll get:
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {benefits.map((benefit, index) => (
+                    <div 
+                      key={index} 
+                      className={`flex items-center space-x-3 p-4 rounded-2xl backdrop-blur-sm border transition-all duration-500 hover-morph hover-glow ${
+                        isDarkMode 
+                          ? 'border-white/10 bg-white/5 hover:bg-white/10' 
+                          : 'border-gray-200 bg-white/90 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className={`p-2 rounded-xl bg-gradient-to-r ${benefit.gradient} shadow-lg`}>
+                        <benefit.icon className="h-5 w-5 text-white" />
+                      </div>
+                      <span className={`font-medium ${
+                        isDarkMode ? 'text-gray-200' : 'text-gray-800'
+                      }`}>
+                        {benefit.text}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Role Info */}
+              {selectedRole && (
+                <div className={`p-8 rounded-3xl backdrop-blur-sm border shadow-2xl transition-all duration-500 hover:scale-105 ${
+                  isDarkMode 
+                    ? 'border-white/10 bg-gradient-to-br from-white/5 to-white/10' 
+                    : 'border-gray-200 bg-gradient-to-br from-white/90 to-gray-50'
+                }`}>
+                  <div className="flex items-center space-x-4 mb-4">
+                    <div className={`p-3 rounded-2xl bg-gradient-to-r ${selectedRole.gradient} shadow-lg`}>
+                      <selectedRole.icon className="h-8 w-8 text-white" />
+                    </div>
+                    <h4 className={`text-2xl font-bold ${
+                      isDarkMode ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      {selectedRole.label} Account
+                    </h4>
+                  </div>
+                  <p className={`text-lg leading-relaxed ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                  }`}>
+                    {selectedRole.description}
                   </p>
                 </div>
+              )}
+
+              {/* Test Credentials Info */}
+              <div className={`p-6 rounded-2xl backdrop-blur-sm border ${
+                isDarkMode 
+                  ? 'border-white/10 bg-white/5' 
+                  : 'border-gray-200 bg-white/90'
+              }`}>
+                <h3 className={`text-sm font-medium mb-2 ${
+                  isDarkMode ? 'text-blue-100' : 'text-blue-900'
+                }`}>Test Accounts</h3>
+                <div className={`text-xs space-y-1 ${
+                  isDarkMode ? 'text-blue-200' : 'text-blue-800'
+                }`}>
+                  <p><strong>Admin:</strong> admin@neuropath.com / admin123</p>
+                  <p><strong>Neurologist:</strong> sarah@neuropath.com / admin123</p>
+                  <p><strong>Patient:</strong> john@neuropath.com / admin123</p>
+                </div>
+                <p className={`text-xs mt-2 ${
+                  isDarkMode ? 'text-blue-300' : 'text-blue-700'
+                }`}>
+                  Remember to select the correct role from the dropdown!
+                </p>
+              </div>
           </div>
 
-          {/* Right Side - Login Form */}
-          <div className="w-full max-w-md mx-auto">
-            <Card className="shadow-2xl border-0">
-              <CardHeader className="space-y-1 pb-6">
-                <CardTitle className="text-2xl text-center text-gray-900 dark:text-white">
-                  Sign In
-                </CardTitle>
-                <p className="text-center text-gray-600 dark:text-gray-400">
-                  Enter your credentials to access your account
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-6">
+            {/* Right Side - Login Form */}
+            <div className="w-full max-w-lg mx-auto lg:max-w-md">
+              <div className={`p-6 md:p-8 rounded-3xl shadow-2xl hover-glow ${
+                isDarkMode 
+                  ? 'glass-premium-dark' 
+                  : 'bg-white/95 border-gray-200 backdrop-blur-sm'
+              }`}>
+                <div className="space-y-2 pb-8 text-center">
+                  <h2 className={`text-2xl md:text-3xl font-bold ${
+                    isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    Sign In
+                  </h2>
+                  <p className={`text-base md:text-lg ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                  }`}>
+                    Enter your credentials to access your account
+                  </p>
+                </div>
+                <div className="space-y-6">
                 
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Role Selection */}
-                  <div className="space-y-2">
-                    <Label htmlFor="role">I am a</Label>
-                    <Select
-                      value={formData.role}
-                      onValueChange={(value) => handleInputChange('role', value)}
-                    >
-                      <SelectTrigger className={errors.role ? 'border-red-500' : ''}>
-                        <SelectValue placeholder="Select your role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {roles.map((role) => (
-                          <SelectItem key={role.value} value={role.value}>
-                            <div className="flex items-center space-x-2">
-                              <role.icon className={`h-4 w-4 ${role.color}`} />
-                              <span>{role.label}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.role && (
-                      <p className="text-sm text-red-500">{errors.role}</p>
-                    )}
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Make sure to select the correct role that matches your account type.
-                    </p>
-                  </div>
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Role Selection */}
+                    <div className="space-y-3">
+                      <Label htmlFor="role" className={`text-base font-semibold ${
+                        isDarkMode ? 'text-white' : 'text-gray-700'
+                      }`}>
+                        I am a
+                      </Label>
+                      <Select
+                        value={formData.role}
+                        onValueChange={(value) => handleInputChange('role', value)}
+                      >
+                        <SelectTrigger className={`h-12 rounded-2xl backdrop-blur-sm border transition-all duration-300 hover-morph smooth-focus ${
+                          errors.role 
+                            ? 'border-red-500 bg-red-50/50 dark:bg-red-900/20' 
+                            : isDarkMode 
+                              ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40' 
+                              : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500'
+                        }`}>
+                          <SelectValue placeholder="Select your role" />
+                        </SelectTrigger>
+                        <SelectContent className="backdrop-blur-xl border-gray-200 bg-white dark:bg-gray-800/90">
+                          {roles.map((role) => (
+                            <SelectItem key={role.value} value={role.value}>
+                              <div className="flex items-center space-x-3">
+                                <div className={`p-1.5 rounded-lg bg-gradient-to-r ${role.gradient}`}>
+                                  <role.icon className="h-4 w-4 text-white" />
+                                </div>
+                                <span>{role.label}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {errors.role && (
+                        <p className="text-sm text-red-500 flex items-center space-x-1">
+                          <span>⚠️</span>
+                          <span>{errors.role}</span>
+                        </p>
+                      )}
+                      <p className={`text-xs mt-1 ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
+                        Make sure to select the correct role that matches your account type.
+                      </p>
+                    </div>
 
-                  {/* Email */}
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      className={errors.email ? 'border-red-500' : ''}
-                    />
-                    {errors.email && (
-                      <p className="text-sm text-red-500">{errors.email}</p>
-                    )}
-                  </div>
-
-                  {/* Password */}
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <div className="relative">
+                    {/* Email */}
+                    <div className="space-y-3">
+                      <Label htmlFor="email" className={`text-base font-semibold ${
+                        isDarkMode ? 'text-white' : 'text-gray-700'
+                      }`}>
+                        Email Address
+                      </Label>
                       <Input
-                        id="password"
-                        type={showPassword ? 'text' : 'password'}
-                        placeholder="Enter your password"
-                        value={formData.password}
-                        onChange={(e) => handleInputChange('password', e.target.value)}
-                        className={errors.password ? 'border-red-500 pr-10' : 'pr-10'}
+                        id="email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={formData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        className={`h-12 rounded-2xl backdrop-blur-sm border transition-all duration-300 ${
+                          errors.email 
+                            ? 'border-red-500 bg-red-50/50 dark:bg-red-900/20' 
+                            : isDarkMode 
+                              ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40' 
+                              : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500'
+                        }`}
                       />
+                      {errors.email && (
+                        <p className="text-sm text-red-500 flex items-center space-x-1">
+                          <span>⚠️</span>
+                          <span>{errors.email}</span>
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Password */}
+                    <div className="space-y-3">
+                      <Label htmlFor="password" className={`text-base font-semibold ${
+                        isDarkMode ? 'text-white' : 'text-gray-700'
+                      }`}>
+                        Password
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id="password"
+                          type={showPassword ? 'text' : 'password'}
+                          placeholder="Enter your password"
+                          value={formData.password}
+                          onChange={(e) => handleInputChange('password', e.target.value)}
+                          className={`h-12 rounded-2xl backdrop-blur-sm border transition-all duration-300 pr-12 ${
+                            errors.password 
+                              ? 'border-red-500 bg-red-50/50 dark:bg-red-900/20' 
+                              : isDarkMode 
+                                ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40' 
+                                : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500'
+                          }`}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                      {errors.password && (
+                        <p className="text-sm text-red-500 flex items-center space-x-1">
+                          <span>⚠️</span>
+                          <span>{errors.password}</span>
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Promo Code Field - Only show for patients */}
+                    {formData.role === 'patient' && (
+                      <div className="space-y-3">
+                        <Label htmlFor="promoCode" className={`text-base font-semibold ${
+                          isDarkMode ? 'text-white' : 'text-gray-700'
+                        }`}>
+                          Promo Code <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>(Optional)</span>
+                        </Label>
+                        <Input
+                          id="promoCode"
+                          type="text"
+                          placeholder="Enter promo code if provided by your doctor"
+                          value={formData.promoCode}
+                          onChange={(e) => handleInputChange('promoCode', e.target.value.toUpperCase())}
+                          className={`h-12 rounded-2xl backdrop-blur-sm border transition-all duration-300 ${
+                            errors.promoCode 
+                              ? 'border-red-500 bg-red-50/50 dark:bg-red-900/20' 
+                              : isDarkMode 
+                                ? 'border-white/20 bg-white/5 hover:bg-white/10 focus:border-white/40' 
+                                : 'border-gray-300 bg-white hover:bg-gray-50 focus:border-blue-500'
+                          }`}
+                        />
+                        {errors.promoCode && (
+                          <p className="text-sm text-red-500 flex items-center space-x-1">
+                            <span>⚠️</span>
+                            <span>{errors.promoCode}</span>
+                          </p>
+                        )}
+                        <p className={`text-xs ${
+                          isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
+                          If you have a promo code from your doctor, enter it here to be assigned to a specific neurologist.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Remember Me & Forgot Password */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <Checkbox
+                          id="remember"
+                          checked={formData.rememberMe}
+                          onCheckedChange={(checked) => handleInputChange('rememberMe', checked)}
+                          className={`rounded-lg border-2 transition-all duration-300 ${
+                            isDarkMode 
+                              ? 'border-white/30 data-[state=checked]:bg-blue-500' 
+                              : 'border-gray-400 data-[state=checked]:bg-blue-500'
+                          }`}
+                        />
+                        <Label htmlFor="remember" className={`text-sm ${
+                          isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                        }`}>
+                          Remember me
+                        </Label>
+                      </div>
                       <Button
                         type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowPassword(!showPassword)}
+                        variant="link"
+                        className={`p-0 h-auto font-semibold text-lg transition-all duration-300 ${
+                          isDarkMode 
+                            ? 'text-blue-400 hover:text-blue-300' 
+                            : 'text-blue-600 hover:text-blue-500'
+                        }`}
+                        onClick={() => toast.info('Password reset feature coming soon!')}
                       >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
+                        Forgot password?
+                      </Button>
+                    </div>
+
+                    {/* Submit Button */}
+                    <div>
+                      <Button
+                        type="submit"
+                        className={`w-full h-14 rounded-2xl font-semibold text-lg transition-all duration-500 transform hover:scale-105 hover:shadow-2xl ripple-effect animate-glow-pulse ${
+                          selectedRole?.gradient 
+                            ? `bg-gradient-to-r ${selectedRole.gradient} hover:shadow-lg` 
+                            : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'
+                        } shadow-lg`}
+                        disabled={isLoading}
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                            Signing In...
+                          </>
                         ) : (
-                          <Eye className="h-4 w-4" />
+                          <>
+                            <Sparkles className="mr-2 h-5 w-5" />
+                            Sign In
+                          </>
                         )}
                       </Button>
                     </div>
-                    {errors.password && (
-                      <p className="text-sm text-red-500">{errors.password}</p>
-                    )}
-                  </div>
+                  </form>
 
-                  {/* Promo Code Field - Only show for patients */}
-                  {formData.role === 'patient' && (
-                    <div className="space-y-2">
-                      <Label htmlFor="promoCode">
-                        Promo Code <span className="text-gray-500 text-sm">(Optional)</span>
-                      </Label>
-                      <Input
-                        id="promoCode"
-                        type="text"
-                        placeholder="Enter promo code if provided by your doctor"
-                        value={formData.promoCode}
-                        onChange={(e) => handleInputChange('promoCode', e.target.value.toUpperCase())}
-                        className={errors.promoCode ? 'border-red-500' : ''}
-                      />
-                      {errors.promoCode && (
-                        <p className="text-sm text-red-500">{errors.promoCode}</p>
-                      )}
-                      <p className="text-xs text-gray-500">
-                        If you have a promo code from your doctor, enter it here to be assigned to a specific neurologist.
-                      </p>
+                  {/* Sign Up Link */}
+                  <div className="text-center pt-6">
+                    <p className={`text-base ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                    }`}>
+                      Don't have an account?{' '}
+                      <Button
+                        variant="link"
+                        className={`p-0 h-auto font-semibold text-lg transition-all duration-300 ${
+                          isDarkMode 
+                            ? 'text-blue-400 hover:text-blue-300' 
+                            : 'text-blue-600 hover:text-blue-500'
+                        }`}
+                        onClick={() => navigate('/signup')}
+                      >
+                        Sign up here
+                      </Button>
+                    </p>
+                    <div className="mt-2">
+                      <Button
+                        variant="link"
+                        className={`p-0 h-auto font-semibold text-lg transition-all duration-300 ${
+                          isDarkMode 
+                            ? 'text-blue-400 hover:text-blue-300' 
+                            : 'text-blue-600 hover:text-blue-500'
+                        }`}
+                        onClick={() => navigate('/supplier-login')}
+                      >
+                        Supplier Login
+                      </Button>
                     </div>
-                  )}
-
-                  {/* Remember Me & Forgot Password */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="remember"
-                        checked={formData.rememberMe}
-                        onCheckedChange={(checked) => handleInputChange('rememberMe', checked)}
-                      />
-                      <Label htmlFor="remember" className="text-sm">
-                        Remember me
-                      </Label>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="link"
-                      className="px-0 text-blue-600 hover:text-blue-500"
-                      onClick={() => toast.info('Password reset feature coming soon!')}
-                    >
-                      Forgot password?
-                    </Button>
-                  </div>
-
-                  {/* Submit Button */}
-                  <Button
-                    type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700 py-6"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Signing In...
-                      </>
-                    ) : (
-                      'Sign In'
-                    )}
-                  </Button>
-                </form>
-
-                {/* Sign Up Link */}
-                <div className="text-center pt-4 space-y-2">
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Don't have an account?{' '}
-                    <Button
-                      variant="link"
-                      className="px-0 text-blue-600 hover:text-blue-500"
-                      onClick={() => navigate('/signup')}
-                    >
-                      Sign up here
-                    </Button>
-                  </p>
-                  <div>
-                    <Button
-                      variant="link"
-                      className="px-0 text-blue-600 hover:text-blue-500"
-                      onClick={() => navigate('/supplier-login')}
-                    >
-                      Supplier Login
-                    </Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </div>
       </div>
