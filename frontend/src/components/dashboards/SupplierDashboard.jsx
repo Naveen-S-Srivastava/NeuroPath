@@ -53,7 +53,7 @@ export const SupplierDashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const updateStatus = async (orderId, status) => {
+  const updateStatus = async (orderId, status, isMainStatus = false) => {
     if (!token) {
       toast.error('Not authenticated. Please login again.');
       return;
@@ -68,12 +68,12 @@ export const SupplierDashboard = () => {
     
     try {
       const note = customNote[orderId] || '';
-      console.log('Updating status:', { orderId, status, note });
+      console.log('Updating status:', { orderId, status, note, isMainStatus });
       
       const res = await fetch(`${API_BASE}/api/suppliers/orders/${orderId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ status, note })
+        body: JSON.stringify({ status, note, isMainStatus })
       });
       
       console.log('Response status:', res.status);
@@ -91,7 +91,7 @@ export const SupplierDashboard = () => {
         throw new Error(data.message || `HTTP ${res.status}: ${data.error || 'Unknown error'}`);
       }
       
-      toast.success('Status updated');
+      toast.success(data.message || 'Status updated');
       // Clear the custom note and status after successful update
       setCustomNote(prev => ({ ...prev, [orderId]: '' }));
       setCustomStatus(prev => ({ ...prev, [orderId]: '' }));
@@ -191,7 +191,7 @@ export const SupplierDashboard = () => {
                   {order.status === 'forwarded_to_supplier' && (
                     <Button 
                       variant="outline" 
-                      onClick={() => updateStatus(order._id, 'processing')}
+                      onClick={() => updateStatus(order._id, 'processing', true)}
                       disabled={updating.has(order._id)}
                     >
                       {updating.has(order._id) ? 'Updating...' : 'Mark Processing'}
@@ -200,7 +200,7 @@ export const SupplierDashboard = () => {
                   {order.status === 'processing' && (
                     <Button 
                       variant="outline" 
-                      onClick={() => updateStatus(order._id, 'shipped')}
+                      onClick={() => updateStatus(order._id, 'shipped', true)}
                       disabled={updating.has(order._id)}
                     >
                       {updating.has(order._id) ? 'Updating...' : 'Mark Shipped'}
@@ -209,7 +209,7 @@ export const SupplierDashboard = () => {
                   {order.status === 'shipped' && (
                     <Button 
                       className="bg-green-600 hover:bg-green-700" 
-                      onClick={() => updateStatus(order._id, 'delivered')}
+                      onClick={() => updateStatus(order._id, 'delivered', true)}
                       disabled={updating.has(order._id)}
                     >
                       {updating.has(order._id) ? 'Updating...' : 'Mark Delivered'}
@@ -220,20 +220,20 @@ export const SupplierDashboard = () => {
                   )}
                 </div>
 
-                {/* Custom Status Update - Only show if not delivered */}
+                {/* Custom Status Update - Available when not delivered */}
                 {order.status !== 'delivered' && (
                   <div className="border-t pt-4">
-                    <div className="text-sm font-semibold mb-2">Add Custom Update</div>
+                    <div className="text-sm font-semibold mb-2">Add Update or Note</div>
                     <div className="flex space-x-2">
                       <Input
-                        placeholder="Enter custom status (e.g., 'Out for delivery')"
+                        placeholder="Enter status update (e.g., 'Out for delivery', 'Delayed due to weather')"
                         value={customStatus[order._id] || ''}
                         onChange={(e) => setCustomStatus(prev => ({ ...prev, [order._id]: e.target.value }))}
                         className="flex-1"
                         disabled={updating.has(order._id)}
                       />
                       <Textarea
-                        placeholder="Add note (optional)"
+                        placeholder="Add additional note (optional)"
                         value={customNote[order._id] || ''}
                         onChange={(e) => setCustomNote(prev => ({ ...prev, [order._id]: e.target.value }))}
                         className="flex-1"
@@ -244,7 +244,7 @@ export const SupplierDashboard = () => {
                         onClick={async () => {
                           const status = customStatus[order._id]?.trim();
                           if (status && status.length > 0) {
-                            await updateStatus(order._id, status.toLowerCase().replace(/\s+/g, '_'));
+                            await updateStatus(order._id, status.toLowerCase().replace(/\s+/g, '_'), false);
                             setCustomStatus(prev => ({ ...prev, [order._id]: '' }));
                           }
                         }}
@@ -253,6 +253,9 @@ export const SupplierDashboard = () => {
                       >
                         {updating.has(order._id) ? 'Updating...' : <><Plus className="h-4 w-4 mr-1" />Add</>}
                       </Button>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-2">
+                      Use this to add tracking updates, delivery notes, or any additional information about this order.
                     </div>
                   </div>
                 )}                {/* Collapsible Tracking Section */}
@@ -272,15 +275,35 @@ export const SupplierDashboard = () => {
                   
                   {expandedOrders.has(order._id) && (
                     <div className="mt-4 space-y-2">
-                      {(order.timeline || []).map((u, idx) => (
-                        <div key={idx} className="flex items-center justify-between text-sm p-2 border rounded">
-                          <div className="capitalize">{u.status.replaceAll('_', ' ')}</div>
-                          <div className="text-gray-500">
-                            {u.at ? new Date(u.at).toLocaleString() : 'Date not available'}
-                            {u.note && <div className="text-xs text-gray-400 mt-1">{u.note}</div>}
+                      {(order.timeline || []).map((u, idx) => {
+                        const isNote = u.status.startsWith('note:');
+                        const displayStatus = isNote ? u.status.replace('note: ', '') : u.status.replaceAll('_', ' ');
+                        const isMainStatus = ['processing', 'shipped', 'delivered'].includes(u.status);
+                        
+                        return (
+                          <div key={idx} className={`flex items-center justify-between text-sm p-3 border rounded ${
+                            isMainStatus ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800' : 
+                            'bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700'
+                          }`}>
+                            <div className="flex items-center space-x-2">
+                              {isMainStatus && <div className="w-2 h-2 bg-blue-500 rounded-full"></div>}
+                              {isNote && <div className="w-2 h-2 bg-gray-400 rounded-full"></div>}
+                              <span className={`capitalize ${isMainStatus ? 'font-semibold text-blue-700 dark:text-blue-300' : ''}`}>
+                                {displayStatus}
+                              </span>
+                              {isNote && <span className="text-xs text-gray-500">(Note)</span>}
+                            </div>
+                            <div className="text-gray-500 text-right">
+                              <div>{u.at ? new Date(u.at).toLocaleString() : 'Date not available'}</div>
+                              {u.note && u.note !== 'Status updated' && u.note !== 'Note added' && (
+                                <div className="text-xs text-gray-400 mt-1 max-w-48 truncate" title={u.note}>
+                                  {u.note}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                       {(order.timeline || []).length === 0 && (
                         <div className="text-center py-4 text-gray-500 text-sm">No tracking updates yet</div>
                       )}
