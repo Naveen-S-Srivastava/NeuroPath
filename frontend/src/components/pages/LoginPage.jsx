@@ -282,10 +282,19 @@ export const LoginPage = () => {
       const data = await response.json();
 
       if (response.ok && data.requiresOTP) {
-        // Credentials verified, OTP sent
+        // Credentials verified, OTP sent (for patients)
         setLoginStep('otp');
         setOtpTimer(data.expiresIn);
         toast.success('Credentials verified! OTP sent to your email.');
+      } else if (response.ok && data.token) {
+        // Direct login successful (for admin/neurologist)
+        console.log('Direct login successful:', data);
+        
+        // Update AuthContext with user data and token
+        updateUser(data.user, data.token);
+        
+        toast.success('Login successful!');
+        navigate(`/${formData.role}-dashboard`);
       } else {
         toast.error(data.message || 'Login failed. Please check your credentials.');
       }
@@ -522,7 +531,9 @@ export const LoginPage = () => {
                         isDarkMode ? 'text-gray-300' : 'text-gray-600'
                       }`}>
                         {loginStep === 'credentials' 
-                          ? 'Enter your credentials to access your account'
+                          ? (formData.role === 'patient' 
+                              ? 'Enter your credentials - OTP will be sent after verification'
+                              : 'Enter your credentials to access your account')
                           : 'Verify your email with OTP'
                         }
                       </p>
@@ -883,12 +894,12 @@ export const LoginPage = () => {
                           {isLoading ? (
                             <>
                               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                              Verifying...
+                              Signing In...
                             </>
                           ) : (
                             <>
                               <Sparkles className="mr-2 h-5 w-5" />
-                              Verify & Continue
+                              {formData.role === 'patient' ? 'Verify & Continue' : 'Sign In'}
                             </>
                           )}
                         </Button>

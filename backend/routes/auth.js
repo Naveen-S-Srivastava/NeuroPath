@@ -67,41 +67,59 @@ router.post('/login', [
       });
     }
 
-    // Generate 6-digit OTP
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    // Only require OTP for patients
+    if (role === 'patient') {
+      // Generate 6-digit OTP
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Delete any existing OTPs for this email and role
-    const OTP = require('../models/OTP');
-    await OTP.deleteMany({ email, role });
+      // Delete any existing OTPs for this email and role
+      const OTP = require('../models/OTP');
+      await OTP.deleteMany({ email, role });
 
-    // Create new OTP
-    const otp = new OTP({
-      email,
-      otp: otpCode,
-      role,
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
-    });
+      // Create new OTP
+      const otp = new OTP({
+        email,
+        otp: otpCode,
+        role,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+      });
 
-    await otp.save();
+      await otp.save();
 
-    // Send OTP via email
-    const emailService = require('../services/emailService');
-    const emailResult = await emailService.sendOTP(email, otpCode, role);
-    
-    if (!emailResult.success) {
-      await OTP.findByIdAndDelete(otp._id); // Clean up if email fails
-      return res.status(500).json({ 
-        message: 'Failed to send OTP email',
-        error: emailResult.error 
+      // Send OTP via email
+      const emailService = require('../services/emailService');
+      const emailResult = await emailService.sendOTP(email, otpCode, role);
+      
+      if (!emailResult.success) {
+        await OTP.findByIdAndDelete(otp._id); // Clean up if email fails
+        return res.status(500).json({ 
+          message: 'Failed to send OTP email',
+          error: emailResult.error 
+        });
+      }
+
+      // Return success with OTP sent confirmation (no token yet)
+      res.json({
+        message: 'Credentials verified. OTP sent to your email.',
+        requiresOTP: true,
+        expiresIn: 600 // 10 minutes in seconds
+      });
+    } else {
+      // For admin and neurologist, generate JWT token directly
+      const token = jwt.sign(
+        { id: user._id, email: user.email, role: user.role },
+        process.env.JWT_SECRET || 'neuropath_secret_key',
+        { expiresIn: '24h' }
+      );
+
+      // Return user data (without password)
+      const { password: _, ...userData } = user.toObject();
+      res.json({
+        user: userData,
+        token,
+        message: 'Login successful'
       });
     }
-
-    // Return success with OTP sent confirmation (no token yet)
-    res.json({
-      message: 'Credentials verified. OTP sent to your email.',
-      requiresOTP: true,
-      expiresIn: 600 // 10 minutes in seconds
-    });
 
   } catch (error) {
     console.error('Login error:', error);
