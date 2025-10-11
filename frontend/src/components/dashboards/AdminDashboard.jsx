@@ -91,12 +91,17 @@ export const AdminDashboard = () => {
   const [showViewPatientModal, setShowViewPatientModal] = useState(false);
   const [showEditPatientModal, setShowEditPatientModal] = useState(false);
   const [showEditPromoCodeModal, setShowEditPromoCodeModal] = useState(false);
+  const [showCreatePromoCodeModal, setShowCreatePromoCodeModal] = useState(false);
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [editPatient, setEditPatient] = useState({
     name: '',
     email: ''
   });
   const [editPromoCode, setEditPromoCode] = useState({
+    promoCode: ''
+  });
+  const [newPromoCode, setNewPromoCode] = useState({
     promoCode: ''
   });
 
@@ -356,6 +361,50 @@ export const AdminDashboard = () => {
     } catch (error) {
       console.error('Update promo code error:', error);
       toast.error('Failed to update promo code');
+    }
+  };
+
+  const handleCreateDoctorPromoCode = (doctor) => {
+    setNewPromoCode({
+      promoCode: ''
+    });
+    setSelectedDoctor(doctor);
+    setShowCreatePromoCodeModal(true);
+  };
+
+  const handleUpdateDoctorPromoCode = async () => {
+    if (!selectedDoctor || !newPromoCode.promoCode.trim()) {
+      toast.error('Promo code is required');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('neuropath_token');
+      const response = await fetch(`http://localhost:5000/api/users/${selectedDoctor._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          promoCode: newPromoCode.promoCode.toUpperCase().trim()
+        }),
+      });
+
+      if (response.ok) {
+        toast.success('Doctor promo code created successfully!');
+        setShowCreatePromoCodeModal(false);
+        setSelectedDoctor(null);
+        setNewPromoCode({ promoCode: '' });
+        // Refresh dashboard data
+        fetchDashboardData();
+      } else {
+        const error = await response.json();
+        toast.error(error.message || 'Failed to create promo code');
+      }
+    } catch (error) {
+      console.error('Create promo code error:', error);
+      toast.error('Failed to create promo code');
     }
   };
 
@@ -651,7 +700,7 @@ export const AdminDashboard = () => {
                     <TableHead>Total Appointments</TableHead>
                     <TableHead>Confirmed</TableHead>
                     <TableHead>Completed</TableHead>
-                    {/* <TableHead>Actions</TableHead> */}
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -693,23 +742,38 @@ export const AdminDashboard = () => {
                             )}
                           </div>
                         ) : (
-                          <span className="text-gray-500">No promo codes</span>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleCreateDoctorPromoCode(doctor)}
+                            className="text-xs"
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            Add Promo Code
+                          </Button>
                         )}
                       </TableCell>
                       <TableCell>{doctor.joinDate}</TableCell>
                       <TableCell>{doctor.totalAppointments}</TableCell>
                       <TableCell>{doctor.confirmedAppointments}</TableCell>
                       <TableCell>{doctor.completedAppointments}</TableCell>
-                      {/* <TableCell>
+                      <TableCell>
                         <div className="flex space-x-2">
+                          {doctor.promoCodes && doctor.promoCodes.length > 0 && (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleCreateDoctorPromoCode(doctor)}
+                              title="Add another promo code"
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          )}
                           <Button variant="outline" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            View Details
+                            <Eye className="h-4 w-4" />
                           </Button>
                         </div>
-                      </TableCell> */}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -1437,6 +1501,41 @@ export const AdminDashboard = () => {
             </Button>
             <Button onClick={handleUpdatePatientPromoCode} className="bg-blue-600 hover:bg-blue-700">
               Update Promo Code
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Promo Code Modal */}
+      <Dialog open={showCreatePromoCodeModal} onOpenChange={setShowCreatePromoCodeModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create Promo Code for Doctor</DialogTitle>
+            <DialogDescription>
+              Create a new promo code for {selectedDoctor?.name}. This code will be used by patients to get assigned to this doctor.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="create-promo-code" className="text-right">
+                Promo Code
+              </label>
+              <Input
+                id="create-promo-code"
+                value={newPromoCode.promoCode}
+                onChange={(e) => setNewPromoCode({...newPromoCode, promoCode: e.target.value.toUpperCase()})}
+                className="col-span-3"
+                placeholder="Enter promo code (e.g., NEURO2024)"
+                required
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreatePromoCodeModal(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateDoctorPromoCode} className="bg-blue-600 hover:bg-blue-700">
+              Create Promo Code
             </Button>
           </DialogFooter>
         </DialogContent>

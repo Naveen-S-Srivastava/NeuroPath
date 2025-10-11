@@ -37,26 +37,44 @@ router.put('/:id', authenticateToken, authorizeRoles('admin'), [
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // If promoCode is being updated, find the associated neurologist
+    // If promoCode is being updated, handle differently for patients vs neurologists
     if (updates.promoCode !== undefined) {
       if (updates.promoCode && updates.promoCode.trim() !== '') {
-        // Find the neurologist with this promo code
-        const neurologist = await User.findOne({ 
-          promoCode: updates.promoCode.toUpperCase().trim(),
-          role: 'neurologist'
-        });
+        const promoCodeValue = updates.promoCode.toUpperCase().trim();
         
-        if (!neurologist) {
-          return res.status(400).json({ message: 'Invalid promo code - no neurologist found with this code' });
+        if (user.role === 'patient') {
+          // For patients: find the neurologist with this promo code
+          const neurologist = await User.findOne({ 
+            promoCode: promoCodeValue,
+            role: 'neurologist'
+          });
+          
+          if (!neurologist) {
+            return res.status(400).json({ message: 'Invalid promo code - no neurologist found with this code' });
+          }
+          
+          updates.promoCode = promoCodeValue;
+          updates.assignedNeurologistId = neurologist._id;
+        } else if (user.role === 'neurologist') {
+          // For neurologists: check if promo code is already used by another neurologist
+          const existingNeurologist = await User.findOne({ 
+            promoCode: promoCodeValue,
+            role: 'neurologist',
+            _id: { $ne: user._id } // Exclude current user
+          });
+          
+          if (existingNeurologist) {
+            return res.status(400).json({ message: 'Promo code already in use by another neurologist' });
+          }
+          
+          updates.promoCode = promoCodeValue;
         }
-        
-        // Update both promoCode and assignedNeurologistId
-        updates.promoCode = updates.promoCode.toUpperCase().trim();
-        updates.assignedNeurologistId = neurologist._id;
       } else {
-        // If promoCode is empty/null, also clear the assigned neurologist
+        // If promoCode is empty/null, also clear the assigned neurologist (for patients)
         updates.promoCode = null;
-        updates.assignedNeurologistId = null;
+        if (user.role === 'patient') {
+          updates.assignedNeurologistId = null;
+        }
       }
     }
 
