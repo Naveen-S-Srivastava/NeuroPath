@@ -151,6 +151,52 @@ module.exports = (io) => {
       appointment.status = accept ? 'confirmed' : 'rejected';
       await appointment.save();
 
+      // Send email notification to patient
+      try {
+        const patient = await User.findById(appointment.patientId);
+        const neurologist = await User.findById(appointment.neurologistId);
+        
+        if (patient && neurologist) {
+          const statusText = accept ? 'Confirmed' : 'Rejected';
+          const statusColor = accept ? '#10B981' : '#EF4444';
+          
+          const mailOptions = {
+            from: process.env.EMAIL_USER || 'neurocare@gmail.com',
+            to: patient.email,
+            subject: `Appointment ${statusText} - NeuroCare`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: ${statusColor};">Appointment ${statusText}</h2>
+                <p>Dear ${patient.name},</p>
+                <p>Your appointment request has been <strong style="color: ${statusColor};">${statusText.toLowerCase()}</strong>.</p>
+                <div style="background-color: #F3F4F6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                  <h3 style="margin-top: 0;">Appointment Details:</h3>
+                  <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 10px;"><strong>Doctor:</strong> Dr. ${neurologist.name}</li>
+                    <li style="margin-bottom: 10px;"><strong>Date:</strong> ${appointment.date}</li>
+                    <li style="margin-bottom: 10px;"><strong>Time:</strong> ${appointment.time}</li>
+                    <li style="margin-bottom: 10px;"><strong>Type:</strong> ${appointment.type}</li>
+                    <li style="margin-bottom: 10px;"><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${statusText}</span></li>
+                  </ul>
+                </div>
+                ${accept ? 
+                  '<p style="color: #10B981; font-weight: bold;">✅ Your appointment has been confirmed. Please arrive 15 minutes early.</p>' :
+                  '<p style="color: #EF4444; font-weight: bold;">❌ Your appointment request has been rejected. Please book another appointment.</p>'
+                }
+                <p>If you have any questions, please contact us.</p>
+                <p>Best regards,<br>NeuroCare Team</p>
+              </div>
+            `
+          };
+
+          await transporter.sendMail(mailOptions);
+          console.log(`Appointment ${statusText.toLowerCase()} email sent successfully to patient:`, patient.email);
+        }
+      } catch (emailError) {
+        console.error('Failed to send appointment status email:', emailError);
+        // Don't fail the response if email fails
+      }
+
       // Notify patient via socket
       try {
         const room = `user_${appointment.patientId}`;
