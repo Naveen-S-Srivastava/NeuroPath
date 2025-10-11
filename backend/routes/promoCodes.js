@@ -41,6 +41,20 @@ router.post('/', authenticateToken, authorizeRoles('neurologist'), async (req, r
   }
 });
 
+// Get all promo codes (admin only)
+router.get('/', authenticateToken, authorizeRoles('admin'), async (req, res) => {
+  try {
+    const promoCodes = await PromoCode.find({})
+      .populate('neurologistId', 'name email')
+      .sort({ createdAt: -1 });
+
+    res.json({ promoCodes });
+  } catch (error) {
+    console.error('Get all promo codes error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // Get all promo codes for a neurologist
 router.get('/my', authenticateToken, authorizeRoles('neurologist'), async (req, res) => {
   try {

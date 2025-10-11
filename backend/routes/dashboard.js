@@ -167,13 +167,27 @@ router.get('/admin', authenticateToken, authorizeRoles('admin'), async (req, res
       // Calculate age (assuming we don't have DOB, using account creation as proxy)
       const age = Math.floor((new Date() - new Date(patient.createdAt)) / (365.25 * 24 * 60 * 60 * 1000));
 
+      // Get assigned neurologist info if exists
+      let assignedNeurologist = null;
+      if (patient.assignedNeurologistId) {
+        const neurologist = allUsers.find(u => u._id.toString() === patient.assignedNeurologistId.toString() && u.role === 'neurologist');
+        if (neurologist) {
+          assignedNeurologist = {
+            _id: neurologist._id,
+            name: neurologist.name,
+            email: neurologist.email
+          };
+        }
+      }
+
       return {
         ...patient.toObject(),
         password: undefined, // Remove password
         age: age || 'N/A',
         joinDate: patient.createdAt ? new Date(patient.createdAt).toLocaleDateString() : 'N/A',
         lastVisit: lastVisit ? new Date(lastVisit.date + ' ' + lastVisit.time).toLocaleDateString() : 'Never',
-        appointments: totalAppointments
+        appointments: totalAppointments,
+        assignedNeurologist: assignedNeurologist
       };
     }));
 
@@ -191,6 +205,16 @@ router.get('/admin', authenticateToken, authorizeRoles('admin'), async (req, res
       // Calculate experience (using account creation as proxy)
       const experience = Math.floor((new Date() - new Date(neurologist.createdAt)) / (365.25 * 24 * 60 * 60 * 1000));
 
+      // Get promo codes for this neurologist (from their User record)
+      const promoCodes = neurologist.promoCode ? [{
+        code: neurologist.promoCode,
+        isActive: true,
+        usageCount: 0,
+        maxUsage: null,
+        createdAt: neurologist.createdAt,
+        expiresAt: null
+      }] : [];
+
       return {
         ...neurologist.toObject(),
         password: undefined, // Remove password
@@ -198,7 +222,8 @@ router.get('/admin', authenticateToken, authorizeRoles('admin'), async (req, res
         joinDate: neurologist.createdAt ? new Date(neurologist.createdAt).toLocaleDateString() : 'N/A',
         totalAppointments,
         confirmedAppointments,
-        completedAppointments
+        completedAppointments,
+        promoCodes: promoCodes
       };
     }));
 

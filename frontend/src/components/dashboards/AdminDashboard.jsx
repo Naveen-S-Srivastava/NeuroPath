@@ -49,12 +49,13 @@ import {
   Brain,
   Sparkles,
   LogOut,
-  User
+  User,
+  Eye
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const AdminDashboard = () => {
-  const { user, logout } = useAuth();
+  const { _user, logout } = useAuth();
   const { isDarkMode, toggleTheme } = useThemeToggle();
   const [activeTab, setActiveTab] = useState('overview');
   const [particles, setParticles] = useState([]);
@@ -89,10 +90,14 @@ export const AdminDashboard = () => {
   });
   const [showViewPatientModal, setShowViewPatientModal] = useState(false);
   const [showEditPatientModal, setShowEditPatientModal] = useState(false);
+  const [showEditPromoCodeModal, setShowEditPromoCodeModal] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [editPatient, setEditPatient] = useState({
     name: '',
     email: ''
+  });
+  const [editPromoCode, setEditPromoCode] = useState({
+    promoCode: ''
   });
 
   const fetchDashboardData = async () => {
@@ -154,15 +159,6 @@ export const AdminDashboard = () => {
 
   // TODO: Replace with API calls
   const doctors = neurologists;
-  const systemAlerts = [
-    {
-      id: 1,
-      type: 'info',
-      message: 'System running normally',
-      time: 'Just now',
-      severity: 'low'
-    }
-  ];
   
 
   // Filter suppliers based on search query
@@ -322,6 +318,47 @@ export const AdminDashboard = () => {
     setShowEditPatientModal(true);
   };
 
+  const handleEditPatientPromoCode = (patient) => {
+    setEditPromoCode({
+      promoCode: patient.promoCode || ''
+    });
+    setSelectedPatient(patient);
+    setShowEditPromoCodeModal(true);
+  };
+
+  const handleUpdatePatientPromoCode = async () => {
+    if (!selectedPatient) return;
+
+    try {
+      const token = localStorage.getItem('neuropath_token');
+      const response = await fetch(`http://localhost:5000/api/users/${selectedPatient._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          promoCode: editPromoCode.promoCode || null
+        }),
+      });
+
+      if (response.ok) {
+        toast.success('Patient promo code updated successfully!');
+        setShowEditPromoCodeModal(false);
+        setSelectedPatient(null);
+        setEditPromoCode({ promoCode: '' });
+        // Refresh dashboard data
+        fetchDashboardData();
+      } else {
+        const error = await response.json();
+        toast.error(error.message || 'Failed to update promo code');
+      }
+    } catch (error) {
+      console.error('Update promo code error:', error);
+      toast.error('Failed to update promo code');
+    }
+  };
+
   const handleUpdatePatient = async () => {
     if (!editPatient.name || !editPatient.email) {
       toast.error('Name and email are required');
@@ -471,31 +508,7 @@ export const AdminDashboard = () => {
                 <Settings className="h-4 w-4 mr-2" />
                 Theme
               </Button>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className={`px-4 py-2 rounded-xl border backdrop-blur-md transition-all duration-300 hover:scale-105 ${
-                  isDarkMode 
-                    ? 'border-white/20 bg-white/10 hover:bg-white/20 text-white' 
-                    : 'border-gray-300 bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700 shadow-sm hover:shadow-md'
-                }`}
-              >
-                <Bell className="h-4 w-4 mr-2" />
-                Alerts ({systemAlerts.length})
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => {/* Navigate to profile page */}}
-                className={`px-4 py-2 rounded-xl border backdrop-blur-md transition-all duration-300 hover:scale-105 ${
-                  isDarkMode 
-                    ? 'border-white/20 bg-white/10 hover:bg-white/20 text-white' 
-                    : 'border-gray-300 bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700 shadow-sm hover:shadow-md'
-                }`}
-              >
-                <User className="h-4 w-4 mr-2" />
-                Profile
-              </Button>
+              
               <Button 
                 variant="ghost" 
                 size="sm"
@@ -633,7 +646,7 @@ export const AdminDashboard = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Neurologist</TableHead>
-                    <TableHead>Experience</TableHead>
+                    <TableHead>Promo Code</TableHead>
                     <TableHead>Join Date</TableHead>
                     <TableHead>Total Appointments</TableHead>
                     <TableHead>Confirmed</TableHead>
@@ -658,7 +671,31 @@ export const AdminDashboard = () => {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{doctor.experience} years</TableCell>
+                      <TableCell>
+                        {doctor.promoCodes && doctor.promoCodes.length > 0 ? (
+                          <div className="space-y-1">
+                            {doctor.promoCodes.slice(0, 2).map((promo, index) => (
+                              <div key={index} className="text-sm">
+                                <Badge variant="outline" className="text-xs">
+                                  {promo.code}
+                                </Badge>
+                                {promo.isActive ? (
+                                  <span className="text-green-600 ml-1">✓</span>
+                                ) : (
+                                  <span className="text-red-600 ml-1">✗</span>
+                                )}
+                              </div>
+                            ))}
+                            {doctor.promoCodes.length > 2 && (
+                              <div className="text-xs text-gray-500">
+                                +{doctor.promoCodes.length - 2} more
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-500">No promo codes</span>
+                        )}
+                      </TableCell>
                       <TableCell>{doctor.joinDate}</TableCell>
                       <TableCell>{doctor.totalAppointments}</TableCell>
                       <TableCell>{doctor.confirmedAppointments}</TableCell>
@@ -710,7 +747,8 @@ export const AdminDashboard = () => {
                     <TableHead>Age</TableHead>
                     <TableHead>Join Date</TableHead>
                     <TableHead>Last Visit</TableHead>
-                    <TableHead>Appointments</TableHead>
+                    <TableHead>Promo Code</TableHead>
+                    <TableHead>Assigned Neurologist</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -734,8 +772,31 @@ export const AdminDashboard = () => {
                       <TableCell>{patient.age}</TableCell>
                       <TableCell>{patient.joinDate}</TableCell>
                       <TableCell>{patient.lastVisit}</TableCell>
-                      <TableCell>{patient.appointments}</TableCell>
-                     
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant="outline" className="text-xs">
+                            {patient.promoCode || 'None'}
+                          </Badge>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleEditPatientPromoCode(patient)}
+                            className="h-6 w-6 p-0"
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {patient.assignedNeurologist ? (
+                          <div className="text-sm">
+                            <div className="font-medium">{patient.assignedNeurologist.name}</div>
+                            <div className="text-gray-500">{patient.assignedNeurologist.email}</div>
+                          </div>
+                        ) : (
+                          <span className="text-gray-500">Not assigned</span>
+                        )}
+                      </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button 
@@ -750,7 +811,7 @@ export const AdminDashboard = () => {
                             size="sm"
                             onClick={() => handleViewPatient(patient)}
                           >
-                            View Details
+                            <Eye className="h-8 w-8" />
                           </Button>
                         </div>
                       </TableCell>
@@ -1343,6 +1404,39 @@ export const AdminDashboard = () => {
             </Button>
             <Button onClick={handleUpdatePatient} className="bg-blue-600 hover:bg-blue-700">
               Update Patient
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* Edit Promo Code Modal */}
+      <Dialog open={showEditPromoCodeModal} onOpenChange={setShowEditPromoCodeModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Patient Promo Code</DialogTitle>
+            <DialogDescription>
+              Update the promo code for {selectedPatient?.name}. Leave empty to remove promo code.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="edit-promo-code" className="text-right">
+                Promo Code
+              </label>
+              <Input
+                id="edit-promo-code"
+                value={editPromoCode.promoCode}
+                onChange={(e) => setEditPromoCode({...editPromoCode, promoCode: e.target.value.toUpperCase()})}
+                className="col-span-3"
+                placeholder="Enter promo code (optional)"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditPromoCodeModal(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdatePatientPromoCode} className="bg-blue-600 hover:bg-blue-700">
+              Update Promo Code
             </Button>
           </DialogFooter>
         </DialogContent>

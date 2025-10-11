@@ -37,6 +37,29 @@ router.put('/:id', authenticateToken, authorizeRoles('admin'), [
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // If promoCode is being updated, find the associated neurologist
+    if (updates.promoCode !== undefined) {
+      if (updates.promoCode && updates.promoCode.trim() !== '') {
+        // Find the neurologist with this promo code
+        const neurologist = await User.findOne({ 
+          promoCode: updates.promoCode.toUpperCase().trim(),
+          role: 'neurologist'
+        });
+        
+        if (!neurologist) {
+          return res.status(400).json({ message: 'Invalid promo code - no neurologist found with this code' });
+        }
+        
+        // Update both promoCode and assignedNeurologistId
+        updates.promoCode = updates.promoCode.toUpperCase().trim();
+        updates.assignedNeurologistId = neurologist._id;
+      } else {
+        // If promoCode is empty/null, also clear the assigned neurologist
+        updates.promoCode = null;
+        updates.assignedNeurologistId = null;
+      }
+    }
+
     // Update user
     Object.assign(user, updates);
     await user.save();
