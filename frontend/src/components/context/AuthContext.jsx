@@ -19,8 +19,8 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Check for existing session
     const checkAuth = async () => {
-      const savedUser = localStorage.getItem('neurocare_user');
-      const token = localStorage.getItem('neurocare_token');
+      const savedUser = localStorage.getItem('neuropath_user');
+      const token = localStorage.getItem('neuropath_token');
 
       if (savedUser && token) {
         try {
@@ -36,13 +36,13 @@ export const AuthProvider = ({ children }) => {
             setUser(data.user);
           } else {
             // Token invalid, clear storage
-            localStorage.removeItem('neurocare_user');
-            localStorage.removeItem('neurocare_token');
+            localStorage.removeItem('neuropath_user');
+            localStorage.removeItem('neuropath_token');
           }
         } catch (error) {
           console.error('Auth check failed:', error);
-          localStorage.removeItem('neurocare_user');
-          localStorage.removeItem('neurocare_token');
+          localStorage.removeItem('neuropath_user');
+          localStorage.removeItem('neuropath_token');
         }
       }
       setIsLoading(false);
@@ -89,8 +89,8 @@ export const AuthProvider = ({ children }) => {
       }
 
       setUser(data.user);
-      localStorage.setItem('neurocare_user', JSON.stringify(data.user));
-      localStorage.setItem('neurocare_token', data.token);
+      localStorage.setItem('neuropath_user', JSON.stringify(data.user));
+      localStorage.setItem('neuropath_token', data.token);
       setIsLoading(false);
       return true;
     } catch (error) {
@@ -135,8 +135,8 @@ export const AuthProvider = ({ children }) => {
       }
 
       setUser(data.user);
-      localStorage.setItem('neurocare_user', JSON.stringify(data.user));
-      localStorage.setItem('neurocare_token', data.token);
+      localStorage.setItem('neuropath_user', JSON.stringify(data.user));
+      localStorage.setItem('neuropath_token', data.token);
       setIsLoading(false);
       return true;
     } catch (error) {
@@ -147,8 +147,8 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('neurocare_user');
-    localStorage.removeItem('neurocare_token');
+    localStorage.removeItem('neuropath_user');
+    localStorage.removeItem('neuropath_token');
   };
 
   const value = {

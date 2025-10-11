@@ -70,7 +70,7 @@ router.post('/login', [
     // Generate JWT token
     const token = jwt.sign(
       { id: user._id, email: user.email, role: user.role },
-      process.env.JWT_SECRET || 'neurocare_secret_key',
+      process.env.JWT_SECRET || 'neuropath_secret_key',
       { expiresIn: '24h' }
     );
 
@@ -126,7 +126,7 @@ router.post('/signup', [
     // Generate JWT token
     const token = jwt.sign(
       { id: newUser._id, email: newUser.email, role: newUser.role },
-      process.env.JWT_SECRET || 'neurocare_secret_key',
+      process.env.JWT_SECRET || 'neuropath_secret_key',
       { expiresIn: '24h' }
     );
 

@@ -55,7 +55,7 @@ router.post('/upload', authenticateToken, upload.single('file'), async (req, res
       return res.status(500).json({ message: `Cloudinary not configured on server. Missing: ${missing.join(', ')}` });
     }
 
-    const folder = process.env.CLOUDINARY_FOLDER || 'neurocare_reports';
+    const folder = process.env.CLOUDINARY_FOLDER || 'neuropath_reports';
 
     const streamUpload = (buffer) => {
       return new Promise((resolve, reject) => {

@@ -8,7 +8,7 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ message: 'Access token required' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET || 'neurocare_secret_key', (err, user) => {
+  jwt.verify(token, process.env.JWT_SECRET || 'neuropath_secret_key', (err, user) => {
     if (err) {
       return res.status(403).json({ message: 'Invalid or expired token' });
     }

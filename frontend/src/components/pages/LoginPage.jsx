@@ -136,9 +136,9 @@ export const LoginPage = () => {
                 <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
                   <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">Test Accounts</h3>
                   <div className="text-xs text-blue-800 dark:text-blue-200 space-y-1">
-                    <p><strong>Admin:</strong> admin@neurocare.com / admin123</p>
-                    <p><strong>Neurologist:</strong> sarah@neurocare.com / admin123</p>
-                    <p><strong>Patient:</strong> john@neurocare.com / admin123</p>
+                    <p><strong>Admin:</strong> admin@neuropath.com / admin123</p>
+                    <p><strong>Neurologist:</strong> sarah@neuropath.com / admin123</p>
+                    <p><strong>Patient:</strong> john@neuropath.com / admin123</p>
                   </div>
                   <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">
                     Remember to select the correct role from the dropdown!

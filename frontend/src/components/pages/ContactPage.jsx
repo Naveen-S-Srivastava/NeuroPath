@@ -77,7 +77,7 @@ export const ContactPage = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">Email</h3>
-                  <p className="text-gray-600 dark:text-gray-300">support@neurocare.com</p>
+                  <p className="text-gray-600 dark:text-gray-300">support@neuropath.com</p>
                 </div>
               </div>
               

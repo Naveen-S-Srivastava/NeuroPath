@@ -29,7 +29,7 @@ module.exports = (io) => {
         return res.status(500).json({ message: `Cloudinary not configured on server. Missing: ${missing.join(', ')}` });
       }
 
-      const folder = process.env.CLOUDINARY_FOLDER_PRESCRIPTIONS || 'neurocare_prescriptions';
+      const folder = process.env.CLOUDINARY_FOLDER_PRESCRIPTIONS || 'neuropath_prescriptions';
 
       const streamUpload = () => new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(

@@ -88,7 +88,7 @@ export const AdminDashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
       const response = await fetch('http://localhost:5000/api/dashboard/admin', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -204,7 +204,7 @@ export const AdminDashboard = () => {
     }
 
     try {
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
       const response = await fetch('http://localhost:5000/api/suppliers', {
         method: 'POST',
         headers: {
@@ -260,7 +260,7 @@ export const AdminDashboard = () => {
     }
 
     try {
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
       const response = await fetch(`http://localhost:5000/api/suppliers/${selectedSupplier._id}`, {
         method: 'PUT',
         headers: {
@@ -314,7 +314,7 @@ export const AdminDashboard = () => {
     }
 
     try {
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
       const response = await fetch(`http://localhost:5000/api/users/${selectedPatient._id}`, {
         method: 'PUT',
         headers: {
@@ -369,7 +369,7 @@ export const AdminDashboard = () => {
                 Admin Dashboard
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
-                Manage the NeuroCare platform and monitor system health
+                Manage the NeuroPath platform and monitor system health
               </p>
             </div>
             <div className="flex items-center space-x-4">

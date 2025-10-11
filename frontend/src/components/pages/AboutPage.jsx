@@ -10,7 +10,7 @@ export const AboutPage = () => {
         <div className="text-center mb-16">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight">
             About 
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> NeuroCare</span>
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> NeuroPath</span>
           </h1>
           <div className="max-w-4xl mx-auto">
             {/* <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 dark:text-gray-300 font-medium leading-relaxed mb-4">
@@ -164,7 +164,7 @@ export const AboutPage = () => {
         {/* Why Choose Us Section */}
         <div className="mb-16 bg-gray-50 dark:bg-gray-800 rounded-xl p-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-8">
-            Why Choose NeuroCare?
+            Why Choose NeuroPath?
           </h2>
           <div className="grid md:grid-cols-2 gap-8">
             <div>
@@ -222,7 +222,7 @@ export const AboutPage = () => {
             Ready to Experience Better Neurological Care?
           </h2>
           <p className="text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-            Join thousands of patients, neurologists, and suppliers who trust NeuroCare for comprehensive, 
+            Join thousands of patients, neurologists, and suppliers who trust NeuroPath for comprehensive, 
             convenient, and secure healthcare solutions.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

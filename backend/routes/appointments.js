@@ -12,7 +12,7 @@ module.exports = (io) => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.EMAIL_USER || 'neurocare@gmail.com',
+      user: process.env.EMAIL_USER || 'neuropath@gmail.com',
       pass: process.env.EMAIL_PASS // App password for Gmail
     }
   });
@@ -97,7 +97,7 @@ module.exports = (io) => {
         const patient = await User.findById(req.user.id);
         
         const mailOptions = {
-          from: process.env.EMAIL_USER || 'neurocare@gmail.com',
+          from: process.env.EMAIL_USER || 'neuropath@gmail.com',
           to: neurologist.email,
           subject: 'New Appointment Booking - Patient Scheduled',
           html: `
@@ -113,7 +113,7 @@ module.exports = (io) => {
               <li><strong>Status:</strong> Pending (Please confirm)</li>
             </ul>
             <p>Please review and confirm this appointment.</p>
-            <p>Best regards,<br>NeuroCare System</p>
+            <p>Best regards,<br>NeuroPath System</p>
           `
         };
 
@@ -161,9 +161,9 @@ module.exports = (io) => {
           const statusColor = accept ? '#10B981' : '#EF4444';
           
           const mailOptions = {
-            from: process.env.EMAIL_USER || 'neurocare@gmail.com',
+            from: process.env.EMAIL_USER || 'neuropath@gmail.com',
             to: patient.email,
-            subject: `Appointment ${statusText} - NeuroCare`,
+            subject: `Appointment ${statusText} - NeuroPath`,
             html: `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h2 style="color: ${statusColor};">Appointment ${statusText}</h2>
@@ -184,7 +184,7 @@ module.exports = (io) => {
                   '<p style="color: #EF4444; font-weight: bold;">❌ Your appointment request has been rejected. Please book another appointment.</p>'
                 }
                 <p>If you have any questions, please contact us.</p>
-                <p>Best regards,<br>NeuroCare Team</p>
+                <p>Best regards,<br>NeuroPath Team</p>
               </div>
             `
           };

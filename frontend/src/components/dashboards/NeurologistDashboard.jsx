@@ -86,7 +86,7 @@ export const NeurologistDashboard = () => {
 
   const fetchPendingOrders = useCallback(async () => {
     try {
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
       const res = await fetch(`${API_BASE}/api/medicine-orders/pending`, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json().catch(() => ({}));
       if (res.ok) setPendingOrders(data.orders || []);
@@ -97,7 +97,7 @@ export const NeurologistDashboard = () => {
 
   const fetchApprovedOrders = useCallback(async () => {
     try {
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
       const res = await fetch(`${API_BASE}/api/medicine-orders/approved`, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json().catch(() => ({}));
       if (res.ok) setApprovedOrders(data.orders || []);
@@ -108,7 +108,7 @@ export const NeurologistDashboard = () => {
 
   const fetchSuppliers = useCallback(async () => {
     try {
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
       const res = await fetch(`${API_BASE}/api/suppliers`, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json().catch(() => ({}));
       if (res.ok) setSuppliers(data.suppliers || []);
@@ -123,7 +123,7 @@ export const NeurologistDashboard = () => {
 
   const rejectOrder = useCallback(async (orderId) => {
     try {
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
       const res = await fetch(`${API_BASE}/api/medicine-orders/${orderId}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -143,7 +143,7 @@ export const NeurologistDashboard = () => {
     try {
       const supplierId = supplierSelection[orderId];
       if (!supplierId) return toast.error('Select a supplier first');
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
       const res = await fetch(`${API_BASE}/api/medicine-orders/${orderId}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -161,7 +161,7 @@ export const NeurologistDashboard = () => {
   }, [API_BASE, supplierSelection, fetchPendingOrders, fetchApprovedOrders]);
 
   useEffect(() => {
-    const token = localStorage.getItem('neurocare_token');
+    const token = localStorage.getItem('neuropath_token');
     let socket;
     try {
       socket = connectSocket(token);
@@ -239,7 +239,7 @@ export const NeurologistDashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
       const response = await fetch('http://localhost:5000/api/dashboard/neurologist', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -280,7 +280,7 @@ export const NeurologistDashboard = () => {
 
   const handleAppointmentAction = async (appointmentId, action) => {
     try {
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
 
       if (action === 'confirmed' || action === 'rejected') {
         // Handle approve/reject for pending appointments
@@ -325,7 +325,7 @@ export const NeurologistDashboard = () => {
     setShowReportsModal(true);
 
     try {
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
       const patientId = appointment.patientUserId || appointment.patientId;
 
       if (!patientId) {
@@ -381,7 +381,7 @@ export const NeurologistDashboard = () => {
     }
 
     try {
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
       const response = await fetch(`${API_BASE}/api/prescriptions`, {
         method: 'POST',
         headers: {
@@ -444,7 +444,7 @@ export const NeurologistDashboard = () => {
 
       pc.onicecandidate = (e) => {
         if (e.candidate) {
-          const socket = connectSocket(localStorage.getItem('neurocare_token'));
+          const socket = connectSocket(localStorage.getItem('neuropath_token'));
           socket.emit('webrtc:ice', { to: target, candidate: e.candidate });
         }
       };
@@ -452,7 +452,7 @@ export const NeurologistDashboard = () => {
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
 
-      const socket = connectSocket(localStorage.getItem('neurocare_token'));
+      const socket = connectSocket(localStorage.getItem('neuropath_token'));
       socket.emit('webrtc:offer', { to: target, offer });
       toast.success('Calling patient...');
     } catch (err) {
@@ -500,7 +500,7 @@ export const NeurologistDashboard = () => {
 
       pc.onicecandidate = (e) => {
         if (e.candidate) {
-          const socket = connectSocket(localStorage.getItem('neurocare_token'));
+          const socket = connectSocket(localStorage.getItem('neuropath_token'));
           socket.emit('webrtc:ice', { to: incomingCall.from, candidate: e.candidate });
         }
       };
@@ -509,7 +509,7 @@ export const NeurologistDashboard = () => {
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
 
-      const socket = connectSocket(localStorage.getItem('neurocare_token'));
+      const socket = connectSocket(localStorage.getItem('neuropath_token'));
       socket.emit('webrtc:answer', { to: incomingCall.from, answer });
 
       setIncomingCall(null);
@@ -525,7 +525,7 @@ export const NeurologistDashboard = () => {
 
   const rejectCall = () => {
     if (incomingCall) {
-      const socket = connectSocket(localStorage.getItem('neurocare_token'));
+      const socket = connectSocket(localStorage.getItem('neuropath_token'));
       socket.emit('webrtc:reject', { to: incomingCall.from });
       setIncomingCall(null);
       setCallOffer(null);
@@ -535,7 +535,7 @@ export const NeurologistDashboard = () => {
 
   const loadChatMessages = async (appointmentId) => {
     try {
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
       const response = await fetch(`${API_BASE}/api/appointments/${appointmentId}/messages`, {
         headers: {
           Authorization: `Bearer ${token}`
@@ -564,7 +564,7 @@ export const NeurologistDashboard = () => {
     if (!appointmentId) return toast.error('Select an appointment to message');
     if (!chatInput.trim()) return;
     try {
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
       const res = await fetch(`${API_BASE}/api/appointments/${appointmentId}/message`, {
         method: 'POST',
         headers: {
@@ -1689,7 +1689,7 @@ export const NeurologistDashboard = () => {
               </div>
               <Button
                 onClick={() => {
-                  const socket = connectSocket(localStorage.getItem('neurocare_token'));
+                  const socket = connectSocket(localStorage.getItem('neuropath_token'));
                   socket.emit('webrtc:end');
                   endCall();
                 }}

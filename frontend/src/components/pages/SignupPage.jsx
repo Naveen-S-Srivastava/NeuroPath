@@ -251,13 +251,13 @@ export const SignupPage = () => {
                   <span className={`text-3xl font-bold ${
                     isDarkMode ? 'text-white' : 'text-gray-900'
                   }`}>
-                    NeuroCare
+                    NeuroPath
                   </span>
                 </div>
                 <h1 className={`text-4xl md:text-5xl font-bold leading-tight ${
                   isDarkMode ? 'text-white' : 'text-gray-900'
                 }`}>
-                  Join NeuroCare Today
+                  Join NeuroPath Today
                 </h1>
                 <p className={`text-lg md:text-xl leading-relaxed ${
                   isDarkMode ? 'text-gray-300' : 'text-gray-600'

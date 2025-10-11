@@ -31,19 +31,19 @@ const seedData = async () => {
     const users = [
       {
         name: 'Admin User',
-        email: 'admin@neurocare.com',
+        email: 'admin@neuropath.com',
         password: hashedPassword,
         role: 'admin'
       },
       {
         name: 'Sarah Johnson',
-        email: 'sarah@neurocare.com',
+        email: 'sarah@neuropath.com',
         password: hashedPassword,
         role: 'neurologist'
       },
       {
         name: 'John Doe',
-        email: 'john@neurocare.com',
+        email: 'john@neuropath.com',
         password: hashedPassword,
         role: 'patient'
       }

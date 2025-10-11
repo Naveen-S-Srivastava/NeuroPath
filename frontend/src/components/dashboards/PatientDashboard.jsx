@@ -73,7 +73,7 @@ export const PatientDashboard = () => {
   const [showCallModal, setShowCallModal] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('neurocare_token');
+    const token = localStorage.getItem('neuropath_token');
     let socket;
     try {
       socket = connectSocket(token);
@@ -143,7 +143,7 @@ export const PatientDashboard = () => {
     // If report is PDF/raw, request a signed access URL from server
     if ((report.fileType && report.fileType.toLowerCase() === 'pdf') || (report.publicId && String(report.publicId).includes('pdf'))) {
       try {
-        const token = localStorage.getItem('neurocare_token');
+        const token = localStorage.getItem('neuropath_token');
         // Ask server for a signed access URL
         const accessRes = await fetch(`http://localhost:5000/api/reports/${report._id || report.id}/access`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -183,7 +183,7 @@ export const PatientDashboard = () => {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
       const response = await fetch('http://localhost:5000/api/dashboard/patient', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -244,7 +244,7 @@ export const PatientDashboard = () => {
 
   const fetchOrders = async () => {
     try {
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
       const res = await fetch(`${API_BASE}/api/medicine-orders/my`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
@@ -269,7 +269,7 @@ export const PatientDashboard = () => {
 
   const fetchNeurologists = async () => {
     try {
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
       const res = await fetch(`${API_BASE}/api/appointments/neurologists`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
@@ -302,7 +302,7 @@ export const PatientDashboard = () => {
   // Load chat messages for an appointment
   const loadChatMessages = async (appointmentId) => {
     try {
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
       const res = await fetch(`${API_BASE}/api/appointments/${appointmentId}/messages`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
@@ -342,7 +342,7 @@ export const PatientDashboard = () => {
 
       pc.onicecandidate = (e) => {
         if (e.candidate) {
-          const socket = connectSocket(localStorage.getItem('neurocare_token'));
+          const socket = connectSocket(localStorage.getItem('neuropath_token'));
           socket.emit('webrtc:ice', { to: target, candidate: e.candidate });
         }
       };
@@ -350,7 +350,7 @@ export const PatientDashboard = () => {
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
 
-      const socket = connectSocket(localStorage.getItem('neurocare_token'));
+      const socket = connectSocket(localStorage.getItem('neuropath_token'));
       socket.emit('webrtc:offer', { to: target, offer });
     } catch (err) {
       console.error('Start call failed', err);
@@ -397,7 +397,7 @@ export const PatientDashboard = () => {
 
       pc.onicecandidate = (e) => {
         if (e.candidate) {
-          const socket = connectSocket(localStorage.getItem('neurocare_token'));
+          const socket = connectSocket(localStorage.getItem('neuropath_token'));
           socket.emit('webrtc:ice', { to: incomingCall.from, candidate: e.candidate });
         }
       };
@@ -406,7 +406,7 @@ export const PatientDashboard = () => {
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
 
-      const socket = connectSocket(localStorage.getItem('neurocare_token'));
+      const socket = connectSocket(localStorage.getItem('neuropath_token'));
       socket.emit('webrtc:answer', { to: incomingCall.from, answer });
 
       setIncomingCall(null);
@@ -422,7 +422,7 @@ export const PatientDashboard = () => {
 
   const rejectCall = () => {
     if (incomingCall) {
-      const socket = connectSocket(localStorage.getItem('neurocare_token'));
+      const socket = connectSocket(localStorage.getItem('neuropath_token'));
       socket.emit('webrtc:reject', { to: incomingCall.from });
       setIncomingCall(null);
       setCallOffer(null);
@@ -435,7 +435,7 @@ export const PatientDashboard = () => {
     const appointmentId = currentChatAppointment._id || currentChatAppointment.id;
     if (!chatInput.trim()) return;
     try {
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
       const res = await fetch(`${API_BASE}/api/appointments/${appointmentId}/message`, {
         method: 'POST',
         headers: {
@@ -512,7 +512,7 @@ export const PatientDashboard = () => {
     
     setOrderUploading(true);
     try {
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
       const form = new FormData();
       form.append('file', file);
       form.append('deliveryAddress', deliveryAddress.trim());
@@ -542,7 +542,7 @@ export const PatientDashboard = () => {
 
     setUploading(true);
     try {
-      const token = localStorage.getItem('neurocare_token');
+      const token = localStorage.getItem('neuropath_token');
 
       // Upload to server which will forward to Cloudinary
       const form = new FormData();
@@ -771,7 +771,7 @@ export const PatientDashboard = () => {
                           </Button>
                           <Button variant="ghost" size="sm" onClick={async () => {
                             try {
-                              const token = localStorage.getItem('neurocare_token');
+                              const token = localStorage.getItem('neuropath_token');
                               const res = await fetch(`http://localhost:5000/api/reports/${report._id || report.id}`, {
                                 method: 'DELETE',
                                 headers: { 'Authorization': `Bearer ${token}` },
@@ -1354,7 +1354,7 @@ export const PatientDashboard = () => {
               </div>
               <Button
                 onClick={() => {
-                  const socket = connectSocket(localStorage.getItem('neurocare_token'));
+                  const socket = connectSocket(localStorage.getItem('neuropath_token'));
                   socket.emit('webrtc:end');
                   endCall();
                 }}

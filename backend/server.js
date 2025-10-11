@@ -21,7 +21,7 @@ app.use(cors({
 app.use(express.json());
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'NeuroCare API is running' });
+  res.json({ status: 'OK', message: 'NeuroPath API is running' });
 });
 
 app.use('/api/auth', authRoutes);
@@ -49,7 +49,7 @@ const jwt = require('jsonwebtoken');
 io.use((socket, next) => {
   const token = socket.handshake.auth && socket.handshake.auth.token;
   if (!token) return next();
-  jwt.verify(token, process.env.JWT_SECRET || 'neurocare_secret_key', (err, user) => {
+  jwt.verify(token, process.env.JWT_SECRET || 'neuropath_secret_key', (err, user) => {
     if (err) return next();
     socket.user = user;
     next();
@@ -138,9 +138,9 @@ app.use((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`NeuroCare API server running on port ${PORT}`);
+  console.log(`NeuroPath API server running on port ${PORT}`);
   console.log('Test accounts:');
-  console.log('Admin: admin@neurocare.com / admin123');
-  console.log('Neurologist: sarah@neurocare.com / admin123');
-  console.log('Patient: john@neurocare.com / admin123');
+  console.log('Admin: admin@neuropath.com / admin123');
+  console.log('Neurologist: sarah@neuropath.com / admin123');
+  console.log('Patient: john@neuropath.com / admin123');
 });

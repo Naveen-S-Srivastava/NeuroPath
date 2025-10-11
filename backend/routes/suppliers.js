@@ -39,7 +39,7 @@ module.exports = (io) => {
 
       const token = jwt.sign(
         { id: supplier._id, role: 'supplier', supplierId: supplier.supplierId },
-        process.env.JWT_SECRET || 'neurocare_secret_key',
+        process.env.JWT_SECRET || 'neuropath_secret_key',
         { expiresIn: '24h' }
       );
       const { password: _, ...data } = supplier.toObject();

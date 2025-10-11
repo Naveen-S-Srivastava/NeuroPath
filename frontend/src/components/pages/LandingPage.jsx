@@ -126,7 +126,7 @@ export const LandingPage = () => {
       name: 'Sarah Johnson',
       role: 'Patient',
       rating: 5,
-      comment: 'NeuroCare transformed my healthcare experience. The video consultations are seamless, and getting my medications delivered the same day is incredible!',
+      comment: 'NeuroPath transformed my healthcare experience. The video consultations are seamless, and getting my medications delivered the same day is incredible!',
       avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah',
       condition: 'Migraine Treatment'
     },
@@ -503,7 +503,7 @@ export const LandingPage = () => {
               <span className="text-yellow-300"> Healthcare Journey?</span>
             </h2>
             <p className="text-lg sm:text-xl text-blue-100 mb-8 leading-relaxed">
-              Join over 25,000 patients, 1,200+ neurologists, and 500+ suppliers who trust NeuroCare 
+              Join over 25,000 patients, 1,200+ neurologists, and 500+ suppliers who trust NeuroPath 
               for comprehensive, convenient, and secure neurological healthcare solutions.
             </p>
             
@@ -569,7 +569,7 @@ export const LandingPage = () => {
                 <div className="bg-gradient-to-br from-blue-600 to-teal-600 p-3 rounded-xl">
                   <Brain className="h-8 w-8 text-white" />
                 </div>
-                <span className="text-2xl font-bold">NeuroCare</span>
+                <span className="text-2xl font-bold">NeuroPath</span>
               </div>
               <p className="text-gray-400 leading-relaxed max-w-md">
                 Leading the future of neurological healthcare with compassionate, 
@@ -628,7 +628,7 @@ export const LandingPage = () => {
                   <div className="bg-green-600 p-2 rounded-lg">
                     <Mail className="h-4 w-4 text-white" />
                   </div>
-                  <span className="text-gray-400">neurocare@gmail.com</span>
+                  <span className="text-gray-400">neuropath@gmail.com</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="bg-purple-600 p-2 rounded-lg">
@@ -643,7 +643,7 @@ export const LandingPage = () => {
           <div className="border-t border-gray-800 mt-16 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center">
               <p className="text-gray-400">
-                © 2025 NeuroCare. All rights reserved. | Made with ❤️ for better healthcare
+                © 2025 NeuroPath. All rights reserved. | Made with ❤️ for better healthcare
               </p>
               
             </div>
