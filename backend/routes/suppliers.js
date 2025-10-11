@@ -194,7 +194,7 @@ module.exports = (io) => {
         return res.status(400).json({ message: 'Status is required' });
       }
       
-      const order = await MedicineOrder.findById(id);
+      const order = await MedicineOrder.findById(id).populate('patientId', 'name email');
       console.log('Found order:', order ? { id: order._id, supplierId: order.supplierId, status: order.status } : 'Order not found');
       
       if (!order) return res.status(404).json({ message: 'Order not found' });
@@ -257,6 +257,41 @@ module.exports = (io) => {
       } catch (saveError) {
         console.error('Save error details:', saveError);
         return res.status(500).json({ message: 'Failed to save order', error: saveError.message });
+      }
+      
+      // Send email notification to patient for status updates
+      try {
+        // Get patient info - order.patientId should be populated from the findById above
+        if (order.patientId && order.patientId.email) {
+          const statusDisplay = isMainStatus ? status.replace(/_/g, ' ') : status.replace(/^note:\s*/, '');
+          const updateType = isMainStatus ? 'Status Update' : 'Order Note';
+          
+          const mailOptions = {
+            from: process.env.EMAIL_USER || 'neuropath@gmail.com',
+            to: order.patientId.email,
+            subject: `NeuroPath - Order ${updateType}`,
+            html: `
+              <h2>Order Update Notification</h2>
+              <p>Dear ${order.patientId.name},</p>
+              <p>Your prescription order has been updated.</p>
+              <h3>Order Details:</h3>
+              <ul>
+                <li><strong>Order ID:</strong> ${order._id}</li>
+                <li><strong>Update Type:</strong> ${updateType}</li>
+                <li><strong>Status:</strong> ${statusDisplay}</li>
+                ${note ? `<li><strong>Note:</strong> ${note}</li>` : ''}
+                <li><strong>Updated:</strong> ${new Date().toLocaleString()}</li>
+              </ul>
+              <p>You can track your order progress in your NeuroPath dashboard.</p>
+              <p>Best regards,<br>NeuroPath Medical Team</p>
+            `
+          };
+          await transporter.sendMail(mailOptions);
+          console.log('Order update email sent to patient:', order.patientId.email);
+        }
+      } catch (emailError) {
+        console.error('Failed to send order update email:', emailError);
+        // Don't fail the request if email fails
       }
       
       io.to(`user_${order.patientId}`).emit('order:updated', { order: order.toObject() });
