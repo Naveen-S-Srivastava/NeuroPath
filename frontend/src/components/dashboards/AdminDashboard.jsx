@@ -105,10 +105,12 @@ export const AdminDashboard = () => {
     promoCode: ''
   });
 
+  const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) ? import.meta.env.VITE_API_URL : 'http://localhost:5000';
+
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem('neuropath_token');
-      const response = await fetch('http://localhost:5000/api/dashboard/admin', {
+      const response = await fetch(`${API_BASE}/api/dashboard/admin`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -221,7 +223,7 @@ export const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('neuropath_token');
-      const response = await fetch('http://localhost:5000/api/suppliers', {
+      const response = await fetch(`${API_BASE}/api/suppliers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -277,7 +279,7 @@ export const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('neuropath_token');
-      const response = await fetch(`http://localhost:5000/api/suppliers/${selectedSupplier._id}`, {
+      const response = await fetch(`${API_BASE}/api/suppliers/${selectedSupplier._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -336,7 +338,7 @@ export const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('neuropath_token');
-      const response = await fetch(`http://localhost:5000/api/users/${selectedPatient._id}`, {
+      const response = await fetch(`${API_BASE}/api/users/${selectedPatient._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -380,7 +382,7 @@ export const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('neuropath_token');
-      const response = await fetch(`http://localhost:5000/api/users/${selectedDoctor._id}`, {
+      const response = await fetch(`${API_BASE}/api/users/${selectedDoctor._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -416,7 +418,7 @@ export const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('neuropath_token');
-      const response = await fetch(`http://localhost:5000/api/users/${selectedPatient._id}`, {
+      const response = await fetch(`${API_BASE}/api/users/${selectedPatient._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

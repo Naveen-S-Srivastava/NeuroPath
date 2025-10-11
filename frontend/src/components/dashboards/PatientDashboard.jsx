@@ -67,7 +67,7 @@ export const PatientDashboard = () => {
 
   // Medicine order (prescription upload) state
   const [orderUploading, setOrderUploading] = useState(false);
-  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [_deliveryAddress, setDeliveryAddress] = useState('');
   const [orders, setOrders] = useState([]);
   const [expandedOrders, setExpandedOrders] = useState(new Set());
   const orderFileRef = React.useRef(null);
@@ -81,7 +81,7 @@ export const PatientDashboard = () => {
     country: '',
     landmark: ''
   });
-  const [useCurrentLocation, setUseCurrentLocation] = useState(false);
+  const [_useCurrentLocation, setUseCurrentLocation] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
 
   // Preview modal state
@@ -181,7 +181,7 @@ export const PatientDashboard = () => {
       try {
         const token = localStorage.getItem('neuropath_token');
         // Ask server for a signed access URL
-        const accessRes = await fetch(`http://localhost:5000/api/reports/${report._id || report.id}/access`, {
+        const accessRes = await fetch(`${API_BASE}/api/reports/${report._id || report.id}/access`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!accessRes.ok) throw new Error('Access denied');
@@ -220,7 +220,7 @@ export const PatientDashboard = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('neuropath_token');
-      const response = await fetch('http://localhost:5000/api/dashboard/patient', {
+      const response = await fetch(`${API_BASE}/api/dashboard/patient`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -590,7 +590,7 @@ export const PatientDashboard = () => {
   };
 
   const formatAddress = () => {
-    const { street, city, state, postalCode, country, landmark } = addressForm;
+    const { street, city, state, postalCode, country, _landmark } = addressForm;
     const parts = [street, city, state, postalCode, country].filter(Boolean);
     return parts.join(', ');
   };
@@ -645,7 +645,7 @@ export const PatientDashboard = () => {
       form.append('file', file);
       if (uploadTitle) form.append('title', uploadTitle);
 
-      const uploadRes = await fetch('http://localhost:5000/api/reports/upload', {
+      const uploadRes = await fetch(`${API_BASE}/api/reports/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1126,7 +1126,7 @@ export const PatientDashboard = () => {
                             onClick={async () => {
                             try {
                                 const token = localStorage.getItem('neuropath_token');
-                              const res = await fetch(`http://localhost:5000/api/reports/${report._id || report.id}`, {
+                              const res = await fetch(`${API_BASE}/api/reports/${report._id || report.id}`, {
                                 method: 'DELETE',
                                 headers: { 'Authorization': `Bearer ${token}` },
                               });
