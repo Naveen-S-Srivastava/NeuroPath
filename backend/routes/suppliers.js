@@ -1,12 +1,22 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 const Supplier = require('../models/Supplier');
 const MedicineOrder = require('../models/MedicineOrder');
 const { authenticateToken, authorizeRoles, authorizeSupplier } = require('../middleware/auth');
 
 module.exports = (io) => {
   const router = express.Router();
+
+  // Email transporter
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER || 'neuropath@gmail.com',
+      pass: process.env.EMAIL_PASS // App password for Gmail
+    }
+  });
 
   // Admin: create supplier
   router.post('/', authenticateToken, authorizeRoles('admin'), async (req, res) => {
@@ -19,6 +29,38 @@ module.exports = (io) => {
       const hash = await bcrypt.hash(password, 10);
       const supplier = new Supplier({ supplierId, name, email, phone, company, password: hash });
       await supplier.save();
+
+      // Send email with supplier details
+      try {
+        const mailOptions = {
+          from: process.env.EMAIL_USER || 'neuropath@gmail.com',
+          to: email,
+          subject: 'Welcome to NeuroPath - Your Supplier Account Details',
+          html: `
+            <h2>Welcome to NeuroPath!</h2>
+            <p>Your supplier account has been successfully created. Here are your login details:</p>
+            <h3>Account Information:</h3>
+            <ul>
+              <li><strong>Supplier ID:</strong> ${supplierId}</li>
+              <li><strong>Name:</strong> ${name}</li>
+              <li><strong>Email:</strong> ${email}</li>
+              <li><strong>Password:</strong> ${password}</li>
+              ${company ? `<li><strong>Company:</strong> ${company}</li>` : ''}
+              ${phone ? `<li><strong>Phone:</strong> ${phone}</li>` : ''}
+            </ul>
+            <p><strong>Important:</strong> Please change your password after your first login for security purposes.</p>
+            <p>You can log in to the NeuroPath supplier portal using your Supplier ID and password.</p>
+            <p>Best regards,<br>NeuroPath Administration Team</p>
+          `
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log('Supplier account details email sent successfully to:', email);
+      } catch (emailError) {
+        console.error('Failed to send supplier email:', emailError);
+        // Don't fail the creation if email fails
+      }
+
       const { password: _, ...data } = supplier.toObject();
       return res.status(201).json({ supplier: data });
     } catch (err) {
