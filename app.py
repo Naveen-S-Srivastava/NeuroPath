@@ -14,7 +14,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-OPENROUTER_API_KEY = "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"
+# OPENROUTER_API_KEY = "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"
+OPENROUTER_API_KEY = ""
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 MODEL_ID = "meta-llama/llama-3.3-70b-instruct:free"
 

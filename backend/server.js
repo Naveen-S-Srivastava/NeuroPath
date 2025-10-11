@@ -37,6 +37,81 @@ app.use('/api/reports', reportsRoutes);
 const prescriptionsRoutes = require('./routes/prescriptions');
 app.use('/api/prescriptions', prescriptionsRoutes);
 
+// EEG Analysis
+const multer = require('multer');
+const path = require('path');
+const { spawn } = require('child_process');
+
+// Configure multer for CSV uploads
+const upload = multer({
+  dest: 'uploads/',
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'text/csv' || path.extname(file.originalname).toLowerCase() === '.csv') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only CSV files are allowed'));
+    }
+  },
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+});
+
+// EEG Prediction endpoint
+app.post('/api/eeg/predict', upload.single('csvFile'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No CSV file uploaded' });
+  }
+
+  const csvPath = path.resolve(req.file.path);
+
+  // Call Python script
+  const pythonProcess = spawn('python', ['../eeg_predict.py', csvPath], {
+    cwd: __dirname,
+    stdio: ['pipe', 'pipe', 'pipe']
+  });
+
+  let output = '';
+  let errorOutput = '';
+
+  pythonProcess.stdout.on('data', (data) => {
+    output += data.toString();
+  });
+
+  pythonProcess.stderr.on('data', (data) => {
+    errorOutput += data.toString();
+  });
+
+  pythonProcess.on('close', (code) => {
+    // Clean up uploaded file
+    require('fs').unlinkSync(req.file.path);
+
+    if (code !== 0) {
+      console.error('Python script error:', errorOutput);
+      return res.status(500).json({
+        error: 'Failed to process EEG data',
+        details: errorOutput
+      });
+    }
+
+    try {
+      const result = JSON.parse(output);
+      if (result.error) {
+        return res.status(400).json({ error: result.error });
+      }
+      res.json(result);
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      res.status(500).json({ error: 'Failed to parse prediction results' });
+    }
+  });
+
+  pythonProcess.on('error', (error) => {
+    console.error('Failed to start Python process:', error);
+    // Clean up uploaded file
+    require('fs').unlinkSync(req.file.path);
+    res.status(500).json({ error: 'Failed to start EEG analysis' });
+  });
+});
+
 // Create HTTP server and attach socket.io
 const server = http.createServer(app);
 const { Server } = require('socket.io');

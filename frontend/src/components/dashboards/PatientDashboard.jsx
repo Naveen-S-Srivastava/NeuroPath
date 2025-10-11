@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Progress } from '../ui/progress';
 import { useAuth } from '../context/AuthContext';
 import { useThemeToggle } from '../hooks/useTheme';
+import { toast } from 'sonner';
 import { ImageWithFallback } from '../ui/ImageWithFallback';
 import {
   Calendar,
@@ -779,7 +780,7 @@ export const PatientDashboard = () => {
                  <Settings className="h-4 w-4 mr-2" />
                  Theme
                </Button>
-               <Button 
+               {/* <Button 
                  variant="ghost" 
                  size="sm"
                  className={`px-4 py-2 rounded-xl border backdrop-blur-md transition-all duration-300 hover:scale-105 ${
@@ -790,7 +791,7 @@ export const PatientDashboard = () => {
                >
                 <Bell className="h-4 w-4 mr-2" />
                 Notifications
-              </Button>
+              </Button> */}
                <Button 
                  variant="ghost" 
                  size="sm"
@@ -1022,7 +1023,7 @@ export const PatientDashboard = () => {
                             }} 
                             disabled={!doc.available}
                           >
-                            <Sparkles className="h-4 w-4 mr-2" />
+                            {/* <Sparkles className="h-4 w-4 mr-2" /> */}
                             Book
                           </Button>
 

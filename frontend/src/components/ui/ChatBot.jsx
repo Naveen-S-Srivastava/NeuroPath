@@ -4,12 +4,13 @@ import { Input } from '../ui/input';
 import { Card } from '../ui/card';
 import { useThemeToggle } from '../hooks/useTheme';
 import FastAPIChatService from '../../services/fastAPIChatService';
-import { 
-  MessageCircle, 
-  Send, 
-  Bot, 
-  User, 
-  Minimize2, 
+import EEGPredictionService from '../../services/eegPredictionService';
+import {
+  MessageCircle,
+  Send,
+  Bot,
+  User,
+  Minimize2,
   Maximize2,
   Loader2,
   Sparkles,
@@ -18,7 +19,9 @@ import {
   Shield,
   Activity,
   Settings,
-  Zap
+  Zap,
+  Upload,
+  FileText
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -27,13 +30,17 @@ const ChatBot = ({ isOpen, onToggle }) => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, _setIsMinimized] = useState(false);
   const [fastAPIService] = useState(new FastAPIChatService());
+  const [eegService] = useState(new EEGPredictionService());
   const [useAI, setUseAI] = useState(false);
   const [aiConnected, setAiConnected] = useState(false);
+  const [eegConnected, setEegConnected] = useState(false);
   const [sessionId] = useState(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+  const [selectedFile, setSelectedFile] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   // Predefined responses for common queries
   const predefinedResponses = {
@@ -62,6 +69,11 @@ const ChatBot = ({ isOpen, onToggle }) => {
       "To access your reports, go to the reports tab in your dashboard where all your medical documents are stored.",
       "Medical reports are available in the reports section of your dashboard. You can view, download, or share them as needed."
     ],
+    eeg: [
+      "I can help you analyze EEG data! Upload a CSV file with your EEG signals and I'll provide seizure detection analysis.",
+      "For EEG analysis, upload your CSV file containing EEG signal data. I'll use our AI model to detect potential seizure activity.",
+      "EEG analysis is available! Simply upload your CSV file with EEG signals, and I'll process it to identify seizure patterns."
+    ],
     emergency: [
       "For medical emergencies, please contact emergency services immediately (911) or go to the nearest emergency room.",
       "If this is a medical emergency, please call emergency services right away. This chatbot is not for emergency situations.",
@@ -81,6 +93,7 @@ const ChatBot = ({ isOpen, onToggle }) => {
     'prescription|medication|medicine|drug': 'prescription',
     'order|buy|purchase|delivery': 'medicine',
     'report|test|result|document': 'report',
+    'eeg|brain|seizure|epilepsy|analysis|signal': 'eeg',
     'emergency|urgent|help|critical': 'emergency',
     'default': 'general'
   };
@@ -98,7 +111,7 @@ const ChatBot = ({ isOpen, onToggle }) => {
         }
       ]);
     }
-  }, []);
+  }, [messages.length]);
 
   useEffect(() => {
     scrollToBottom();
@@ -111,7 +124,11 @@ const ChatBot = ({ isOpen, onToggle }) => {
     if (apiUrl) {
       initializeAI(apiUrl);
     }
-  }, []);
+
+    // Initialize EEG service
+    const backendUrl = localStorage.getItem('neuropath_backend_url') || 'http://localhost:5000';
+    initializeEEG(backendUrl);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const initializeAI = async (baseUrl = 'http://localhost:8000') => {
     try {
@@ -147,6 +164,98 @@ const ChatBot = ({ isOpen, onToggle }) => {
     if (apiUrl) {
       localStorage.setItem('neuropath_ai_api_url', apiUrl);
       initializeAI(apiUrl);
+    }
+  };
+
+  const initializeEEG = async (baseUrl = 'http://localhost:5000') => {
+    try {
+      console.log('Initializing EEG service with URL:', baseUrl);
+      eegService.initialize(baseUrl);
+
+      console.log('Testing EEG health...');
+      const isHealthy = await eegService.healthCheck();
+      console.log('EEG Health check result:', isHealthy);
+
+      if (isHealthy) {
+        setEegConnected(true);
+        toast.success('EEG Analysis service connected!');
+        console.log('EEG service successfully connected');
+      } else {
+        setEegConnected(false);
+        toast.error('EEG service unavailable - check if backend server is running');
+        console.log('EEG health check failed');
+      }
+    } catch (error) {
+      console.error('Failed to initialize EEG service:', error);
+      setEegConnected(false);
+      toast.error('Failed to connect to EEG service: ' + error.message);
+    }
+  };
+
+  const setBackendUrl = () => {
+    const currentUrl = localStorage.getItem('neuropath_backend_url') || 'http://localhost:5000';
+    const backendUrl = prompt('Enter your Backend URL:', currentUrl);
+    if (backendUrl) {
+      localStorage.setItem('neuropath_backend_url', backendUrl);
+      initializeEEG(backendUrl);
+    }
+  };
+
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.type !== 'text/csv' && !file.name.toLowerCase().endsWith('.csv')) {
+        toast.error('Please select a CSV file');
+        return;
+      }
+      setSelectedFile(file);
+      toast.success(`File selected: ${file.name}`);
+    }
+  };
+
+  const handleEEGUpload = async () => {
+    if (!selectedFile) {
+      toast.error('Please select a CSV file first');
+      return;
+    }
+
+    if (!eegConnected) {
+      toast.error('EEG service not connected. Please check backend URL.');
+      return;
+    }
+
+    setIsTyping(true);
+
+    try {
+      const result = await eegService.predictFromCSV(selectedFile);
+      const formattedResult = eegService.formatPredictionResults(result.results);
+
+      const botMessage = {
+        id: Date.now() + 1,
+        text: formattedResult,
+        sender: 'bot',
+        timestamp: new Date(),
+        source: 'eeg-analysis',
+        type: 'eeg-result'
+      };
+
+      setMessages(prev => [...prev, botMessage]);
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      console.error('EEG analysis error:', error);
+      const errorMessage = {
+        id: Date.now() + 1,
+        text: `Error analyzing EEG data: ${error.message}`,
+        sender: 'bot',
+        timestamp: new Date(),
+        source: 'error'
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsTyping(false);
     }
   };
 
@@ -189,8 +298,16 @@ const ChatBot = ({ isOpen, onToggle }) => {
 
     try {
       let botResponse;
-      
-      if (useAI && aiConnected) {
+
+      // Check if user is asking for EEG analysis
+      const message = inputMessage.toLowerCase();
+      if (message.includes('eeg') || message.includes('brain') || message.includes('seizure') || message.includes('analysis')) {
+        if (eegConnected) {
+          botResponse = "I can help you analyze EEG data! Please upload a CSV file with your EEG signals, and I'll process it to detect seizure activity.";
+        } else {
+          botResponse = "EEG analysis service is currently unavailable. Please check that the backend server is running and try configuring the backend URL.";
+        }
+      } else if (useAI && aiConnected) {
         // Use AI model for response
         botResponse = await fastAPIService.sendMessage(inputMessage, {
           sessionId,
@@ -213,7 +330,7 @@ const ChatBot = ({ isOpen, onToggle }) => {
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
       console.error('Error getting response:', error);
-      
+
       // Fallback to predefined response
       const fallbackResponse = getBotResponse(inputMessage);
       const botMessage = {
@@ -303,6 +420,11 @@ const ChatBot = ({ isOpen, onToggle }) => {
                   ) : (
                     <Settings className="h-3 w-3 text-gray-400" title="AI Disconnected" />
                   )}
+                  {eegConnected ? (
+                    <Brain className="h-3 w-3 text-blue-500 ml-1" title="EEG Analysis Connected" />
+                  ) : (
+                    <Brain className="h-3 w-3 text-gray-400 ml-1" title="EEG Analysis Disconnected" />
+                  )}
                 </p>
               </div>
             </div>
@@ -323,6 +445,19 @@ const ChatBot = ({ isOpen, onToggle }) => {
               <Button
                 variant="ghost"
                 size="sm"
+                onClick={setBackendUrl}
+                className={`p-1 h-8 w-8 rounded-full ${
+                  isDarkMode 
+                    ? 'hover:bg-white/10 text-gray-400' 
+                    : 'hover:bg-gray-100 text-gray-500'
+                }`}
+                title="Configure Backend URL"
+              >
+                <Brain className="h-4 w-4" />
+              </Button>
+              {/* <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setIsMinimized(!isMinimized)}
                 className={`p-1 h-8 w-8 rounded-full ${
                   isDarkMode 
@@ -331,7 +466,7 @@ const ChatBot = ({ isOpen, onToggle }) => {
                 }`}
               >
                 {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
-              </Button>
+              </Button> */}
               <Button
                 variant="ghost"
                 size="sm"
@@ -436,6 +571,52 @@ const ChatBot = ({ isOpen, onToggle }) => {
             <div className={`p-4 border-t ${
               isDarkMode ? 'border-white/10' : 'border-gray-200'
             }`}>
+              {/* File Upload for EEG */}
+              {eegConnected && (
+                <div className="mb-3 p-3 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <FileText className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {selectedFile ? `Selected: ${selectedFile.name}` : 'Upload EEG CSV file for analysis'}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".csv"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                        id="eeg-file-input"
+                      />
+                      <label
+                        htmlFor="eeg-file-input"
+                        className={`cursor-pointer px-3 py-1 text-xs rounded-md ${
+                          isDarkMode
+                            ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                            : 'bg-blue-500 hover:bg-blue-600 text-white'
+                        }`}
+                      >
+                        <Upload className="h-3 w-3 inline mr-1" />
+                        Browse
+                      </label>
+                      {selectedFile && (
+                        <Button
+                          onClick={handleEEGUpload}
+                          disabled={isTyping}
+                          size="sm"
+                          className="h-7 px-3 text-xs bg-green-500 hover:bg-green-600"
+                        >
+                          <Brain className="h-3 w-3 mr-1" />
+                          Analyze
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center space-x-2">
                 <Input
                   ref={inputRef}
@@ -469,13 +650,17 @@ const ChatBot = ({ isOpen, onToggle }) => {
               
               {/* Quick Actions */}
               <div className="mt-3 flex flex-wrap gap-2">
-                {['Book Appointment', 'View Prescriptions', 'Order Medicine', 'Emergency'].map((action) => (
+                {['EEG Analysis'].map((action) => (
                   <Button
                     key={action}
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      setInputMessage(action);
+                      if (action === 'EEG Analysis') {
+                        setInputMessage('I need EEG analysis');
+                      } else {
+                        setInputMessage(action);
+                      }
                       inputRef.current?.focus();
                     }}
                     className={`text-xs px-3 py-1 h-7 rounded-lg ${
@@ -484,6 +669,7 @@ const ChatBot = ({ isOpen, onToggle }) => {
                         : 'border-gray-300 bg-white hover:bg-gray-50 text-gray-700'
                     }`}
                   >
+                    {action === 'EEG Analysis' && <Brain className="h-3 w-3 mr-1" />}
                     {action}
                   </Button>
                 ))}
