@@ -219,7 +219,7 @@ export const PatientDashboard = () => {
   const [neurologists, setNeurologists] = useState([]);
   const [selectedNeurologist, setSelectedNeurologist] = useState(null);
   const [bookingOpen, setBookingOpen] = useState(false);
-  const [promoCodeShown, setPromoCodeShown] = useState(false);
+  const [_promoCodeShown, setPromoCodeShown] = useState(false);
 
   // Chat & WebRTC state
   const [chatMessagesState, setChatMessagesState] = useState([]);
@@ -229,7 +229,7 @@ export const PatientDashboard = () => {
   const localStreamRef = React.useRef(null);
   const remoteVideoRef = React.useRef(null);
   const [remoteStream, setRemoteStream] = useState(null);
-  const [callActive, setCallActive] = useState(false);
+  const [_callActive, setCallActive] = useState(false);
   const [incomingCall, setIncomingCall] = useState(null);
   const [callOffer, setCallOffer] = useState(null);
 
