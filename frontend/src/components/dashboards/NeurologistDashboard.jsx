@@ -662,7 +662,7 @@ export const NeurologistDashboard = () => {
       <div className="relative z-10 max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8 animate-slide-in-blur">
-          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
               <div 
                 className={`flex items-center space-x-2 cursor-pointer transition-all duration-300 hover:scale-105 px-4 py-2 rounded-xl border-2 shadow-lg hover:shadow-xl backdrop-blur-md ${
@@ -691,12 +691,12 @@ export const NeurologistDashboard = () => {
                     ? 'from-white to-gray-300' 
                     : 'from-gray-900 to-gray-700'
                 } bg-clip-text text-transparent`}>
-                  Namaste, Dr. {user?.name}!
+            Namaste, Dr. {user?.name}!
                 </h1>
                 <p className={`text-sm ${
                   isDarkMode ? 'text-gray-300' : 'text-gray-600'
                 }`}>
-                  You have {analytics.appointmentsToday} appointments today
+            You have {analytics.appointmentsToday} appointments today
                 </p>
               </div>
             </div>
@@ -736,9 +736,9 @@ export const NeurologistDashboard = () => {
                     : 'border-gray-300 bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700 shadow-sm hover:shadow-md'
                 }`}
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Create Prescription
-              </Button>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Prescription
+                </Button>
               <Button 
                 variant="ghost" 
                 size="sm"
@@ -765,8 +765,8 @@ export const NeurologistDashboard = () => {
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </Button>
+              </div>
             </div>
-          </div>
 
             {/* Pending Requests */}
           {pendingRequests.length > 0 && (
@@ -797,9 +797,9 @@ export const NeurologistDashboard = () => {
                         <Button 
                           className="bg-green-600 hover:bg-green-700 transition-all duration-300 hover:scale-105" 
                           onClick={() => {
-                            const socket = getSocket();
-                            socket && socket.emit('appointment:respond', { appointmentId: req._id, accept: true });
-                            setPendingRequests(prev => prev.filter(p => p._id !== req._id));
+                          const socket = getSocket();
+                          socket && socket.emit('appointment:respond', { appointmentId: req._id, accept: true });
+                          setPendingRequests(prev => prev.filter(p => p._id !== req._id));
                           }}
                         >
                           <Check className="h-4 w-4 mr-2" />
@@ -809,9 +809,9 @@ export const NeurologistDashboard = () => {
                           variant="outline" 
                           className="border-red-300 text-red-600 hover:bg-red-50 transition-all duration-300 hover:scale-105"
                           onClick={() => {
-                            const socket = getSocket();
-                            socket && socket.emit('appointment:respond', { appointmentId: req._id, accept: false });
-                            setPendingRequests(prev => prev.filter(p => p._id !== req._id));
+                          const socket = getSocket();
+                          socket && socket.emit('appointment:respond', { appointmentId: req._id, accept: false });
+                          setPendingRequests(prev => prev.filter(p => p._id !== req._id));
                           }}
                         >
                           <X className="h-4 w-4 mr-2" />
@@ -916,13 +916,13 @@ export const NeurologistDashboard = () => {
             </TabsTrigger>
           </TabsList>
 
-           {/* Overview Tab */}
-           <TabsContent value="overview" className="space-y-6">
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-6">
              <div className="grid lg:grid-cols-3 gap-6">
                {/* Left Column - Pending Appointments */}
                <div className="lg:col-span-2 space-y-6">
-                 {/* Pending Appointments */}
-                 {pendingAppointments.length > 0 && (
+                {/* Pending Appointments */}
+                {pendingAppointments.length > 0 && (
                    <div>
                      <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
                        isDarkMode 
@@ -934,68 +934,68 @@ export const NeurologistDashboard = () => {
                            <h3 className={`text-lg font-semibold ${
                              isDarkMode ? 'text-white' : 'text-gray-900'
                            }`}>
-                             Pending Appointment Requests
+                          Pending Appointment Requests
                            </h3>
-                           <Badge variant="secondary">{pendingAppointments.length}</Badge>
+                          <Badge variant="secondary">{pendingAppointments.length}</Badge>
                          </div>
                        </div>
                        <div className="space-y-4">
-                         {pendingAppointments.map((appointment) => (
-                           <div key={appointment._id || appointment.id} className="flex items-center space-x-4 p-4 border rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
-                             <Avatar className="h-12 w-12">
-                               <AvatarImage src={appointment.avatar} alt={appointment.patient} />
-                               <AvatarFallback>{appointment.patient.charAt(0)}</AvatarFallback>
-                             </Avatar>
-                             <div className="flex-1">
-                               <div className="flex items-center justify-between">
-                                 <h4 className="font-semibold text-gray-900 dark:text-white">
-                                   {appointment.patient}
-                                 </h4>
-                                 <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
-                                   Pending Approval
-                                 </Badge>
-                               </div>
-                               <p className="text-sm text-gray-600 dark:text-gray-400">{appointment.reason}</p>
-                               <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
-                                 <span className="flex items-center">
-                                   <Calendar className="h-4 w-4 mr-1" />
-                                   {appointment.date}
-                                 </span>
-                                 <span className="flex items-center">
-                                   <Clock className="h-4 w-4 mr-1" />
-                                   {appointment.time}
-                                 </span>
-                                 <span>{appointment.type}</span>
-                               </div>
-                             </div>
-                             <div className="flex flex-col gap-2 space-x-2">
-                               <Button
-                                 variant="outline"
-                                 size="sm"
-                                 className="w-24 bg-green-50 hover:bg-green-100 border-green-300 text-green-700"
-                                 onClick={() => handleAppointmentAction(appointment._id || appointment.id, 'confirmed')}
-                               >
-                                 <Check className="h-4 w-4 mr-1" />
-                                 Approve
-                               </Button>
-                               <Button
-                                 variant="outline"
-                                 size="sm"
-                                 className="w-24 bg-red-50 hover:bg-red-100 border-red-300 text-red-700"
-                                 onClick={() => handleAppointmentAction(appointment._id || appointment.id, 'rejected')}
-                               >
-                                 <X className="h-4 w-4 mr-1" />
-                                 Reject
-                               </Button>
-                             </div>
-                           </div>
-                         ))}
+                        {pendingAppointments.map((appointment) => (
+                          <div key={appointment._id || appointment.id} className="flex items-center space-x-4 p-4 border rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+                            <Avatar className="h-12 w-12">
+                              <AvatarImage src={appointment.avatar} alt={appointment.patient} />
+                              <AvatarFallback>{appointment.patient.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-semibold text-gray-900 dark:text-white">
+                                  {appointment.patient}
+                                </h4>
+                                <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                                  Pending Approval
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">{appointment.reason}</p>
+                              <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                                <span className="flex items-center">
+                                  <Calendar className="h-4 w-4 mr-1" />
+                                  {appointment.date}
+                                </span>
+                                <span className="flex items-center">
+                                  <Clock className="h-4 w-4 mr-1" />
+                                  {appointment.time}
+                                </span>
+                                <span>{appointment.type}</span>
+                              </div>
+                            </div>
+                            <div className="flex flex-col gap-2 space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-24 bg-green-50 hover:bg-green-100 border-green-300 text-green-700"
+                                onClick={() => handleAppointmentAction(appointment._id || appointment.id, 'confirmed')}
+                              >
+                                <Check className="h-4 w-4 mr-1" />
+                                Approve
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-24 bg-red-50 hover:bg-red-100 border-red-300 text-red-700"
+                                onClick={() => handleAppointmentAction(appointment._id || appointment.id, 'rejected')}
+                              >
+                                <X className="h-4 w-4 mr-1" />
+                                Reject
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
                        </div>
                      </div>
-                   </div>
-                 )}
+                  </div>
+                )}
 
-                 {/* Today's Schedule */}
+                {/* Today's Schedule */}
                  <div>
                    <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
                      isDarkMode 
@@ -1007,7 +1007,7 @@ export const NeurologistDashboard = () => {
                          <h3 className={`text-lg font-semibold ${
                            isDarkMode ? 'text-white' : 'text-gray-900'
                          }`}>
-                           Today's Schedule
+                        Today's Schedule
                          </h3>
                          <Button 
                            variant="outline" 
@@ -1019,60 +1019,60 @@ export const NeurologistDashboard = () => {
                                : 'border-gray-300 bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700'
                            }`}
                          >
-                           View All
-                         </Button>
+                          View All
+                        </Button>
                        </div>
                      </div>
                      <div className="space-y-4">
-                       {todayAppointments.map((appointment) => (
-                         <div key={appointment._id || appointment.id} className="flex items-center space-x-4 p-4 border rounded-lg">
-                           <Avatar className="h-12 w-12">
-                             <AvatarImage src={appointment.avatar} alt={appointment.patient} />
-                             <AvatarFallback>{appointment.patient.charAt(0)}</AvatarFallback>
-                           </Avatar>
-                           <div className="flex-1">
-                             <div className="flex items-center justify-between">
-                               <h4 className="font-semibold text-gray-900 dark:text-white">
-                                 {appointment.patient}
-                               </h4>
-                               <Badge variant={appointment.status === 'completed' ? 'default' : 'secondary'}>
-                                 {appointment.status}
-                               </Badge>
-                             </div>
-                             <p className="text-sm text-gray-600 dark:text-gray-400">{appointment.reason}</p>
-                             <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
-                               <span className="flex items-center">
-                                 <Clock className="h-4 w-4 mr-1" />
-                                 {appointment.time}
-                               </span>
-                               <span>{appointment.type}</span>
-                             </div>
-                           </div>
-                           <div className="flex space-x-2">
-                             {appointment.status === 'upcoming' && (
-                               <>
-                                 <Button
-                                   variant="outline"
-                                   size="sm"
-                                   onClick={() => handleAppointmentAction(appointment._id || appointment.id, 'started')}
-                                 >
-                                   <Video className="h-4 w-4" />
-                                 </Button>
-                                 <Button
-                                   variant="outline"
-                                   size="sm"
-                                   onClick={() => handleAppointmentAction(appointment._id || appointment.id, 'rescheduled')}
-                                 >
-                                   <Calendar className="h-4 w-4" />
-                                 </Button>
-                               </>
-                             )}
-                           </div>
-                         </div>
-                       ))}
+                      {todayAppointments.map((appointment) => (
+                        <div key={appointment._id || appointment.id} className="flex items-center space-x-4 p-4 border rounded-lg">
+                          <Avatar className="h-12 w-12">
+                            <AvatarImage src={appointment.avatar} alt={appointment.patient} />
+                            <AvatarFallback>{appointment.patient.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-semibold text-gray-900 dark:text-white">
+                                {appointment.patient}
+                              </h4>
+                              <Badge variant={appointment.status === 'completed' ? 'default' : 'secondary'}>
+                                {appointment.status}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{appointment.reason}</p>
+                            <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                              <span className="flex items-center">
+                                <Clock className="h-4 w-4 mr-1" />
+                                {appointment.time}
+                              </span>
+                              <span>{appointment.type}</span>
+                            </div>
+                          </div>
+                          <div className="flex space-x-2">
+                            {appointment.status === 'upcoming' && (
+                              <>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleAppointmentAction(appointment._id || appointment.id, 'started')}
+                                >
+                                  <Video className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleAppointmentAction(appointment._id || appointment.id, 'rescheduled')}
+                                >
+                                  <Calendar className="h-4 w-4" />
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                      </div>
-                   </div>
-                 </div>
+                </div>
+              </div>
 
                  {/* Recent Activity */}
                  <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
@@ -1162,7 +1162,7 @@ export const NeurologistDashboard = () => {
                </div>
 
                {/* Right Column - Quick Actions & Stats */}
-               <div className="space-y-6">
+              <div className="space-y-6">
                  <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
                    isDarkMode 
                      ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
@@ -1183,9 +1183,9 @@ export const NeurologistDashboard = () => {
                            : 'bg-blue-600 hover:bg-blue-700 text-white'
                        }`}
                      >
-                       <Plus className="h-4 w-4 mr-2" />
-                       New Prescription
-                     </Button>
+                      <Plus className="h-4 w-4 mr-2" />
+                      New Prescription
+                    </Button>
                      <Button 
                        variant="outline" 
                        className={`w-full justify-start transition-all duration-300 hover:scale-105 ${
@@ -1194,9 +1194,9 @@ export const NeurologistDashboard = () => {
                            : 'border-gray-300 bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700'
                        }`}
                      >
-                       <MessageSquare className="h-4 w-4 mr-2" />
-                       Message Patient
-                     </Button>
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Message Patient
+                    </Button>
                      <Button 
                        variant="outline" 
                        className={`w-full justify-start transition-all duration-300 hover:scale-105 ${
@@ -1205,9 +1205,9 @@ export const NeurologistDashboard = () => {
                            : 'border-gray-300 bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700'
                        }`}
                      >
-                       <Calendar className="h-4 w-4 mr-2" />
-                       Schedule Appointment
-                     </Button>
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Schedule Appointment
+                    </Button>
                      <Button 
                        variant="outline" 
                        className={`w-full justify-start transition-all duration-300 hover:scale-105 ${
@@ -1216,9 +1216,9 @@ export const NeurologistDashboard = () => {
                            : 'border-gray-300 bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700'
                        }`}
                      >
-                       <BarChart3 className="h-4 w-4 mr-2" />
-                       View Analytics
-                     </Button>
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      View Analytics
+                    </Button>
                    </div>
                  </div>
 
@@ -1289,9 +1289,9 @@ export const NeurologistDashboard = () => {
                      </div>
                    </div>
                  </div>
-               </div>
-             </div>
-           </TabsContent>
+              </div>
+            </div>
+          </TabsContent>
 
           {/* Appointments Tab */}
           <TabsContent value="appointments" className="space-y-6">
@@ -1351,7 +1351,7 @@ export const NeurologistDashboard = () => {
                           </div>
                         </div>
                       </div>
-                       <div className="flex flex-col space-y-2">
+                      <div className="flex flex-col space-y-2">
                          <Button 
                            variant="outline" 
                            size="sm" 
@@ -1362,9 +1362,9 @@ export const NeurologistDashboard = () => {
                                : 'border-blue-300 bg-blue-50 hover:bg-blue-100 hover:border-blue-400 text-blue-600 hover:text-blue-700'
                            }`}
                          >
-                           <MessageCircle className="h-4 w-4 mr-2" />
-                           Message 
-                         </Button>
+                              <MessageCircle className="h-4 w-4 mr-2" />
+                              Message 
+                            </Button>
                          <Button 
                            variant="outline" 
                            size="sm" 
@@ -1375,9 +1375,9 @@ export const NeurologistDashboard = () => {
                                : 'border-green-300 bg-green-50 hover:bg-green-100 hover:border-green-400 text-green-600 hover:text-green-700'
                            }`}
                          >
-                           <Eye className="h-4 w-4 mr-2" />
-                           View Report
-                         </Button>
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Report
+                            </Button>
                          <Button 
                            variant="outline" 
                            size="sm" 
@@ -1388,27 +1388,27 @@ export const NeurologistDashboard = () => {
                                : 'border-purple-300 bg-purple-50 hover:bg-purple-100 hover:border-purple-400 text-purple-600 hover:text-purple-700'
                            }`}
                          >
-                           <FileText className="h-4 w-4 mr-2" />
-                           Prescription
-                         </Button>
-                       </div>
+                              <FileText className="h-4 w-4 mr-2" />
+                              Prescription
+                            </Button>
+                      </div>
                     </div>
                 </div>
               ))}
             </div>
           </TabsContent>
 
-           {/* Patients Tab */}
-           <TabsContent value="patients" className="space-y-6">
-             <div className="flex items-center justify-between">
+          {/* Patients Tab */}
+          <TabsContent value="patients" className="space-y-6">
+            <div className="flex items-center justify-between">
                <h2 className={`text-2xl font-bold bg-gradient-to-r ${
                  isDarkMode 
                    ? 'from-white to-gray-300' 
                    : 'from-gray-900 to-gray-700'
                } bg-clip-text text-transparent`}>My Patients</h2>
-               <div className="flex items-center space-x-4">
-                 <div className="relative">
-                   <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                    <Input 
                      placeholder="Search patients..." 
                      className={`pl-10 w-64 rounded-lg border backdrop-blur-sm ${
@@ -1417,7 +1417,7 @@ export const NeurologistDashboard = () => {
                          : 'border-gray-300 bg-white hover:bg-gray-50 text-gray-900 placeholder-gray-500'
                      }`} 
                    />
-                 </div>
+                </div>
                  <Button 
                    variant="outline" 
                    size="sm"
@@ -1427,15 +1427,15 @@ export const NeurologistDashboard = () => {
                        : 'border-gray-300 bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700'
                    }`}
                  >
-                   <Filter className="h-4 w-4 mr-2" />
-                   Filter
-                 </Button>
-               </div>
-             </div>
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filter
+                </Button>
+              </div>
+            </div>
 
              <div className="grid lg:grid-cols-4 gap-6">
-               {/* Patient List */}
-               <div className="lg:col-span-1 space-y-4">
+              {/* Patient List */}
+              <div className="lg:col-span-1 space-y-4">
                  <div className={`p-4 rounded-2xl backdrop-blur-md border transition-all duration-300 ${
                    isDarkMode 
                      ? 'bg-white/10 border-white/20' 
@@ -1447,46 +1447,46 @@ export const NeurologistDashboard = () => {
                      Patient List ({patients.length})
                    </h3>
                    <div className="space-y-3 max-h-96 overflow-y-auto">
-                     {patients.map((patient) => (
+                {patients.map((patient) => (
                        <div
-                         key={patient._id || patient.id}
+                    key={patient._id || patient.id}
                          className={`p-3 rounded-xl border transition-all duration-300 hover:shadow-lg cursor-pointer ${
                            isDarkMode 
                              ? 'bg-white/5 border-white/20 hover:bg-white/10 hover:border-white/30' 
                              : 'bg-white/10 border-gray-200 hover:bg-white/20 hover:border-gray-300'
                          } ${(selectedPatient?._id || selectedPatient?.id) === (patient._id || patient.id) ? (isDarkMode ? 'bg-blue-900/20 border-blue-800' : 'bg-blue-50 border-blue-200') : ''
-                           }`}
-                         onClick={() => setSelectedPatient(patient)}
-                       >
-                         <div className="flex items-center space-x-3">
+                      }`}
+                    onClick={() => setSelectedPatient(patient)}
+                  >
+                      <div className="flex items-center space-x-3">
                            <Avatar className="h-10 w-10">
-                             <AvatarImage src={patient.avatar} alt={patient.name} />
-                             <AvatarFallback>{patient.name ? patient.name.charAt(0) : ''}</AvatarFallback>
-                           </Avatar>
+                          <AvatarImage src={patient.avatar} alt={patient.name} />
+                          <AvatarFallback>{patient.name ? patient.name.charAt(0) : ''}</AvatarFallback>
+                        </Avatar>
                            <div className="flex-1 min-w-0">
                              <h3 className={`font-semibold text-sm truncate ${
                                isDarkMode ? 'text-white' : 'text-gray-900'
                              }`}>
-                               {patient.name}
-                             </h3>
+                            {patient.name}
+                          </h3>
                              <p className={`text-xs truncate ${
                                isDarkMode ? 'text-gray-400' : 'text-gray-500'
                              }`}>
                                {patient.email || 'No email'}
                              </p>
-                           </div>
-                         </div>
+                        </div>
+                      </div>
                        </div>
-                     ))}
+                ))}
                    </div>
                  </div>
-               </div>
+              </div>
 
-               {/* Patient Details */}
+              {/* Patient Details */}
                <div className="lg:col-span-3">
-                 {selectedPatient ? (
-                   <div className="space-y-6">
-                     {/* Patient Basic Info */}
+                {selectedPatient ? (
+                  <div className="space-y-6">
+                    {/* Patient Basic Info */}
                      <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
                        isDarkMode 
                          ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
@@ -1494,10 +1494,10 @@ export const NeurologistDashboard = () => {
                      }`}>
                        <div className="flex items-center space-x-4 mb-6">
                          <Avatar className="h-20 w-20">
-                           <AvatarImage src={selectedPatient.avatar} alt={selectedPatient.name} />
-                           <AvatarFallback>{selectedPatient.name ? selectedPatient.name.charAt(0) : ''}</AvatarFallback>
-                         </Avatar>
-                         <div>
+                            <AvatarImage src={selectedPatient.avatar} alt={selectedPatient.name} />
+                            <AvatarFallback>{selectedPatient.name ? selectedPatient.name.charAt(0) : ''}</AvatarFallback>
+                          </Avatar>
+                          <div>
                            <h3 className={`text-3xl font-bold ${
                              isDarkMode ? 'text-white' : 'text-gray-900'
                            }`}>{selectedPatient.name.toUpperCase()}</h3>
@@ -1506,11 +1506,11 @@ export const NeurologistDashboard = () => {
                            }`}>
                              Patient ID: {selectedPatient._id || selectedPatient.id}
                            </p>
-                         </div>
-                       </div>
+                          </div>
+                        </div>
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                         {/* Contact Information */}
-                         <div>
+                        {/* Contact Information */}
+                        <div>
                            <h4 className={`font-semibold mb-3 ${
                              isDarkMode ? 'text-white' : 'text-gray-900'
                            }`}>Contact Information</h4>
@@ -1522,7 +1522,7 @@ export const NeurologistDashboard = () => {
                                <span className={`${
                                  isDarkMode ? 'text-white' : 'text-gray-900'
                                }`}>{selectedPatient.phone || 'Not provided'}</span>
-                             </div>
+                            </div>
                              <div className="flex items-center space-x-2">
                                <span className={`w-16 ${
                                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
@@ -1530,12 +1530,12 @@ export const NeurologistDashboard = () => {
                                <span className={`${
                                  isDarkMode ? 'text-white' : 'text-gray-900'
                                }`}>{selectedPatient.email || 'Not provided'}</span>
-                             </div>
-                           </div>
-                         </div>
+                            </div>
+                          </div>
+                        </div>
 
-                         {/* Medical History */}
-                         <div>
+                        {/* Medical History */}
+                        <div>
                            <h4 className={`font-semibold mb-3 ${
                              isDarkMode ? 'text-white' : 'text-gray-900'
                            }`}>Medical History</h4>
@@ -1544,10 +1544,10 @@ export const NeurologistDashboard = () => {
                                <ul className={`list-disc list-inside space-y-1 text-sm ${
                                  isDarkMode ? 'text-gray-300' : 'text-gray-600'
                                }`}>
-                                 {(selectedPatient.medicalHistory || []).map((item, index) => (
-                                   <li key={index}>{item}</li>
-                                 ))}
-                               </ul>
+                            {(selectedPatient.medicalHistory || []).map((item, index) => (
+                              <li key={index}>{item}</li>
+                            ))}
+                          </ul>
                              ) : (
                                <p className={`text-sm ${
                                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
@@ -1555,9 +1555,9 @@ export const NeurologistDashboard = () => {
                              )}
                            </div>
                          </div>
-                       </div>
+                        </div>
 
-                       {/* Current Medications */}
+                        {/* Current Medications */}
                        <div className="mt-6">
                          <h4 className={`font-semibold mb-3 ${
                            isDarkMode ? 'text-white' : 'text-gray-900'
@@ -1570,20 +1570,20 @@ export const NeurologistDashboard = () => {
                                    ? 'border-white/30 text-white' 
                                    : 'border-gray-300 text-gray-700'
                                }`}>
-                                 {medication}
-                               </Badge>
+                                {medication}
+                              </Badge>
                              ))
                            ) : (
                              <p className={`text-sm ${
                                isDarkMode ? 'text-gray-400' : 'text-gray-500'
                              }`}>No current medications</p>
                            )}
-                         </div>
-                       </div>
+                          </div>
+                        </div>
                      </div>
 
                      <div className="grid lg:grid-cols-2 gap-6">
-                       {/* Appointment History */}
+                    {/* Appointment History */}
                        <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
                          isDarkMode 
                            ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
@@ -1594,15 +1594,15 @@ export const NeurologistDashboard = () => {
                              <h3 className={`text-lg font-semibold ${
                                isDarkMode ? 'text-white' : 'text-gray-900'
                              }`}>
-                               Appointment History
+                          Appointment History
                              </h3>
-                             <Badge variant="secondary">
-                               {(selectedPatient.appointmentHistory || []).length} appointments
-                             </Badge>
+                          <Badge variant="secondary">
+                            {(selectedPatient.appointmentHistory || []).length} appointments
+                          </Badge>
                            </div>
                          </div>
                          <div className="space-y-3 max-h-64 overflow-y-auto">
-                           {selectedPatient.appointmentHistory && selectedPatient.appointmentHistory.length > 0 ? (
+                        {selectedPatient.appointmentHistory && selectedPatient.appointmentHistory.length > 0 ? (
                              selectedPatient.appointmentHistory.map((appointment) => (
                                <div key={appointment._id} className={`p-3 rounded-lg border transition-all duration-300 ${
                                  isDarkMode 
@@ -1610,38 +1610,38 @@ export const NeurologistDashboard = () => {
                                    : 'bg-white/10 border-gray-200 hover:bg-white/20'
                                }`}>
                                  <div className="flex items-center justify-between">
-                                   <div className="text-sm">
+                                  <div className="text-sm">
                                      <div className={`font-medium ${
                                        isDarkMode ? 'text-white' : 'text-gray-900'
                                      }`}>{appointment.date} at {appointment.time}</div>
                                      <div className={`${
                                        isDarkMode ? 'text-gray-400' : 'text-gray-600'
                                      }`}>{appointment.type} • {appointment.reason}</div>
-                                   </div>
-                                   <Badge
-                                     variant={
-                                       appointment.status === 'confirmed' ? 'default' :
-                                       appointment.status === 'completed' ? 'secondary' :
-                                       appointment.status === 'rejected' ? 'destructive' : 'outline'
-                                     }
-                                   >
-                                     {appointment.status}
-                                   </Badge>
-                                 </div>
-                               </div>
+                                </div>
+                                <Badge
+                                  variant={
+                                    appointment.status === 'confirmed' ? 'default' :
+                                    appointment.status === 'completed' ? 'secondary' :
+                                    appointment.status === 'rejected' ? 'destructive' : 'outline'
+                                  }
+                                >
+                                  {appointment.status}
+                                </Badge>
+                              </div>
+                          </div>
                              ))
-                           ) : (
+                        ) : (
                              <div className={`text-center py-8 ${
                                isDarkMode ? 'text-gray-400' : 'text-gray-500'
                              }`}>
-                               <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                               <p>No appointment history found</p>
-                             </div>
-                           )}
+                            <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                            <p>No appointment history found</p>
+                          </div>
+                        )}
                          </div>
                        </div>
 
-                       {/* Patient Reports */}
+                    {/* Patient Reports */}
                        <div className={`p-6 rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
                          isDarkMode 
                            ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
@@ -1652,15 +1652,15 @@ export const NeurologistDashboard = () => {
                              <h3 className={`text-lg font-semibold ${
                                isDarkMode ? 'text-white' : 'text-gray-900'
                              }`}>
-                               Medical Reports
+                          Medical Reports
                              </h3>
-                             <Badge variant="secondary">
-                               {(selectedPatient.reports || []).length} reports
-                             </Badge>
+                          <Badge variant="secondary">
+                            {(selectedPatient.reports || []).length} reports
+                          </Badge>
                            </div>
                          </div>
                          <div className="space-y-3 max-h-64 overflow-y-auto">
-                           {selectedPatient.reports && selectedPatient.reports.length > 0 ? (
+                        {selectedPatient.reports && selectedPatient.reports.length > 0 ? (
                              selectedPatient.reports.map((report) => (
                                <div key={report._id} className={`p-3 rounded-lg border transition-all duration-300 hover:shadow-lg ${
                                  isDarkMode 
@@ -1668,25 +1668,25 @@ export const NeurologistDashboard = () => {
                                    : 'bg-white/10 border-gray-200 hover:bg-white/20'
                                }`}>
                                  <div className="flex items-center justify-between">
-                                   <div className="flex items-center space-x-3">
-                                     {report.fileType?.toLowerCase() === 'pdf' ? (
+                                <div className="flex items-center space-x-3">
+                                  {report.fileType?.toLowerCase() === 'pdf' ? (
                                        <div className={`w-8 h-10 rounded flex items-center justify-center ${
                                          isDarkMode ? 'bg-red-900' : 'bg-red-100'
                                        }`}>
                                          <FileText className={`h-4 w-4 ${
                                            isDarkMode ? 'text-red-400' : 'text-red-600'
                                          }`} />
-                                       </div>
-                                     ) : (
-                                       <img
-                                         src={report.previewUrl || report.url}
-                                         alt={report.name}
+                                    </div>
+                                  ) : (
+                                    <img
+                                      src={report.previewUrl || report.url}
+                                      alt={report.name}
                                          className="w-8 h-10 object-cover rounded border"
-                                         onError={(e) => {
+                                      onError={(e) => {
                                            e.target.src = 'https://via.placeholder.com/32x40?text=Img';
-                                         }}
-                                       />
-                                     )}
+                                      }}
+                                    />
+                                  )}
                                      <div className="text-sm min-w-0 flex-1">
                                        <div className={`font-medium truncate ${
                                          isDarkMode ? 'text-white' : 'text-gray-900'
@@ -1694,60 +1694,60 @@ export const NeurologistDashboard = () => {
                                        <div className={`text-xs ${
                                          isDarkMode ? 'text-gray-400' : 'text-gray-600'
                                        }`}>
-                                         {new Date(report.createdAt).toLocaleDateString()} • {report.fileType || 'Unknown'}
-                                       </div>
-                                     </div>
-                                   </div>
-                                   <Button
-                                     variant="outline"
-                                     size="sm"
-                                     onClick={() => window.open(report.url, '_blank')}
+                                      {new Date(report.createdAt).toLocaleDateString()} • {report.fileType || 'Unknown'}
+                                    </div>
+                                  </div>
+                                </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => window.open(report.url, '_blank')}
                                      className={`transition-all duration-300 hover:scale-105 ${
                                        isDarkMode 
                                          ? 'border-white/30 bg-white/10 hover:bg-white/20 text-white' 
                                          : 'border-gray-300 bg-white/80 hover:bg-white hover:border-gray-400 text-gray-700'
                                      }`}
-                                   >
+                                >
                                      <Eye className="h-3 w-3 mr-1" />
-                                     View
-                                   </Button>
-                                 </div>
-                               </div>
+                                  View
+                                </Button>
+                              </div>
+                          </div>
                              ))
-                           ) : (
+                        ) : (
                              <div className={`text-center py-8 ${
                                isDarkMode ? 'text-gray-400' : 'text-gray-500'
                              }`}>
-                               <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                               <p>No reports uploaded yet</p>
-                             </div>
-                           )}
+                            <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                            <p>No reports uploaded yet</p>
+                          </div>
+                        )}
                          </div>
                        </div>
                      </div>
-                   </div>
-                 ) : (
+                  </div>
+                ) : (
                    <div className={`p-12 text-center rounded-2xl backdrop-blur-md border transition-all duration-300 hover:shadow-xl ${
                      isDarkMode 
                        ? 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-white/30' 
                        : 'bg-white/20 border-white/30 hover:bg-white/30 hover:border-white/40 shadow-lg'
                    }`}>
-                     <Users className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+                      <Users className="h-16 w-16 mx-auto text-gray-400 mb-4" />
                      <h3 className={`text-lg font-semibold mb-2 ${
                        isDarkMode ? 'text-white' : 'text-gray-900'
                      }`}>
-                       Select a Patient
-                     </h3>
+                        Select a Patient
+                      </h3>
                      <p className={`${
                        isDarkMode ? 'text-gray-400' : 'text-gray-600'
                      }`}>
-                       Choose a patient from the list to view their detailed information, appointment history, and medical reports
-                     </p>
+                        Choose a patient from the list to view their detailed information, appointment history, and medical reports
+                      </p>
                    </div>
-                 )}
-               </div>
-             </div>
-           </TabsContent>
+                )}
+              </div>
+            </div>
+          </TabsContent>
 
           {/* Medicine Orders Tab */}
           <TabsContent value="medicine" className="space-y-6">
