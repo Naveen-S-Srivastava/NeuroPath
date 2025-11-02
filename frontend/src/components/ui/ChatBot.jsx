@@ -126,9 +126,10 @@ const ChatBot = ({ isOpen, onToggle }) => {
 
   // Initialize FastAPI service when component mounts
   useEffect(() => {
-    // Clear any old cached URLs and force correct ports
-    localStorage.removeItem('neuropath_ai_api_url');
-    localStorage.setItem('neuropath_ai_api_url', 'http://localhost:5000');
+  // Clear any old cached URLs and force correct ports
+  // Use port 5100 for the AI assistant (FastAPI) to avoid colliding with backend on 5000
+  localStorage.removeItem('neuropath_ai_api_url');
+  localStorage.setItem('neuropath_ai_api_url', 'http://localhost:5100');
     localStorage.setItem('neuropath_backend_url', 'http://localhost:5000');
     localStorage.setItem('neuropath_alzheimer_api_url', 'http://localhost:8000');
     
@@ -144,7 +145,7 @@ const ChatBot = ({ isOpen, onToggle }) => {
 
     // Initialize Alzheimer service
     const alzheimerUrl = localStorage.getItem('neuropath_alzheimer_api_url') || 'http://localhost:8000';
-    const alzheimerApiKey = localStorage.getItem('neuropath_alzheimer_api_key') || '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';
+    const alzheimerApiKey = localStorage.getItem('neuropath_alzheimer_api_key') || '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';
     initializeAlzheimer(alzheimerApiKey, alzheimerUrl);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -249,7 +250,7 @@ const ChatBot = ({ isOpen, onToggle }) => {
     const alzheimerUrl = prompt('Enter your Alzheimer API URL:', currentUrl);
     if (alzheimerUrl) {
       localStorage.setItem('neuropath_alzheimer_api_url', alzheimerUrl);
-      const apiKey = localStorage.getItem('neuropath_alzheimer_api_key') || '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';
+      const apiKey = localStorage.getItem('neuropath_alzheimer_api_key') || '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';
       initializeAlzheimer(apiKey, alzheimerUrl);
     }
   };

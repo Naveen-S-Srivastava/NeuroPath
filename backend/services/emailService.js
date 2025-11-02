@@ -1,28 +1,22 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
 class EmailService {
   constructor() {
-    this.transporter = nodemailer.createTransport({
-      service: 'gmail', // You can change this to your preferred email service
-      auth: {
-        user: process.env.EMAIL_USER || 'your-email@gmail.com',
-        pass: process.env.EMAIL_PASS || 'your-app-password'
-      }
-    });
+    this.resend = new Resend(process.env.RESEND_API_KEY || 'your-resend-api-key');
   }
 
   async sendOTP(email, otp, role) {
     try {
       const mailOptions = {
-        from: `"NeuroPath" <${process.env.EMAIL_USER || 'noreply@neuropath.com'}>`,
+        from: process.env.EMAIL_FROM || 'noreply@neuropath.com',
         to: email,
         subject: 'NeuroPath - Email Verification Code',
         html: this.generateOTPEmailTemplate(otp, role)
       };
 
-      const result = await this.transporter.sendMail(mailOptions);
-      console.log('OTP email sent successfully:', result.messageId);
-      return { success: true, messageId: result.messageId };
+      const result = await this.resend.emails.send(mailOptions);
+      console.log('OTP email sent successfully:', result.id);
+      return { success: true, messageId: result.id };
     } catch (error) {
       console.error('Error sending OTP email:', error);
       return { success: false, error: error.message };
@@ -89,8 +83,11 @@ class EmailService {
 
   async testConnection() {
     try {
-      await this.transporter.verify();
-      console.log('Email service connection verified');
+      // Resend doesn't have a direct verify method, so we check if API key is set
+      if (!process.env.RESEND_API_KEY) {
+        throw new Error('RESEND_API_KEY not set');
+      }
+      console.log('Email service API key verified');
       return true;
     } catch (error) {
       console.error('Email service connection failed:', error);

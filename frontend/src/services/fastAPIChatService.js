@@ -9,7 +9,8 @@ class FastAPIChatService {
   }
 
   // Initialize the service with API credentials
-  initialize(apiKey, baseUrl = 'http://localhost:5000') {
+  // Default base URL uses port 5100 where the FastAPI AI assistant runs (avoids collision with backend on 5000)
+  initialize(apiKey, baseUrl = 'http://localhost:5100') {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.isConnected = true;
@@ -17,7 +18,7 @@ class FastAPIChatService {
   }
 
   // Send message to the AI model (updated for your friend's API)
-  async sendMessage(message, context = {}) {
+  async sendMessage(message = {}) {
     if (!this.isConnected) {
       throw new Error('FastAPI service not initialized. Please provide API key.');
     }
@@ -64,13 +65,13 @@ class FastAPIChatService {
   }
 
   // Get conversation history (not implemented in your friend's API yet)
-  async getConversationHistory(sessionId) {
+  async getConversationHistory() {
     console.log('Conversation history not implemented in current API');
     return [];
   }
 
   // Clear conversation (not implemented in your friend's API yet)
-  async clearConversation(sessionId) {
+  async clearConversation() {
     console.log('Clear conversation not implemented in current API');
     return true;
   }

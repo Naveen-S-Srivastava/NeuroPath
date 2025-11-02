@@ -14,7 +14,7 @@ import json
 import os
 
 # Configuration
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "eeg_models/best_eeg_model.pth")
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "neuro_chatbot_model(eeg)/dataset/best_eeg_model.pth")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Model Definition

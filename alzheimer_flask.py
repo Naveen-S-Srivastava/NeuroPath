@@ -1,5 +1,6 @@
 import os
 import io
+from dotenv import load_dotenv
 import torch
 import torch.nn as nn
 from torchvision import transforms, models
@@ -10,8 +11,13 @@ from flask_cors import CORS
 # =====================================
 # 🔧 Configuration
 # =====================================
+load_dotenv()
+
 MODEL_PATH = "best_alzheimer_model.pth"
-API_KEY = "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"  # 🔒 Replace this with your actual API key
+# Load API key from environment (recommended). To set it locally, create a .env file with ALZHEIMER_API_KEY=...
+API_KEY = os.environ.get("ALZHEIMER_API_KEY", "")
+if not API_KEY:
+    print("⚠️  ALZHEIMER_API_KEY not set in environment. Requests to /predict will be rejected unless you set the key.")
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # =====================================

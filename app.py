@@ -1,4 +1,6 @@
 from fastapi import FastAPI, HTTPException
+import os
+from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
@@ -14,8 +16,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# OPENROUTER_API_KEY = "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"
-OPENROUTER_API_KEY = "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"
+load_dotenv()
+# OPENROUTER API key (recommended to set via environment variable)
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+if not OPENROUTER_API_KEY:
+    print("⚠️  OPENROUTER_API_KEY not set in environment. External chat requests may fail.")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 MODEL_ID = "meta-llama/llama-3.3-70b-instruct:free"
 
@@ -28,6 +33,11 @@ class ChatResponse(BaseModel):
 @app.get("/health")
 def health_check():
     return {"status": "healthy", "message": "NeuroPath AI Assistant is running"}
+
+
+@app.get("/")
+def root():
+    return {"message": "NeuroPath AI Assistant is running", "endpoints": ["/health", "/chat"]}
 
 @app.post("/chat", response_model=ChatResponse)
 def chat_with_neuro_assistant(request: ChatRequest):
@@ -79,4 +89,5 @@ def chat_with_neuro_assistant(request: ChatRequest):
 # Run the server
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=5000)
+    # Run FastAPI AI assistant on a non-conflicting port (default backend uses 5000)
+    uvicorn.run(app, host="127.0.0.1", port=5100)

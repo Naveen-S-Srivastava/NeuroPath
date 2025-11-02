@@ -1,6 +1,7 @@
 import os
 import io
 import torch
+from dotenv import load_dotenv
 import torch.nn as nn
 from fastapi import FastAPI, UploadFile, File, Header, HTTPException
 from fastapi.responses import JSONResponse
@@ -9,10 +10,13 @@ from datetime import datetime
 # ================================
 # Configuration
 # ================================
-API_KEY ="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"  # 🔒 Replace with your actual key
-# API_KEY = "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"  # 🔒 Replace with your actual key
+load_dotenv()
+# API key for the EEG prediction API. Set this in your environment or an .env file as EEG_API_KEY
+API_KEY = os.environ.get("EEG_API_KEY", "")
+if not API_KEY:
+    print("⚠️  EEG_API_KEY not set in environment. Requests to /predict will be rejected unless you set the key.")
 UPLOAD_DIR = "uploads"
-MODEL_PATH = "eeg_models/best_eeg_model.pth"
+MODEL_PATH = "neuro_chatbot_model(eeg)/dataset/best_eeg_model.pth"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
